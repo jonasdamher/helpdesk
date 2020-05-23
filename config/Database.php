@@ -4,6 +4,7 @@ class Database {
 
     private string $driver;
     private string $host;
+    private int $port;
     private string $user;
     private string $pass;
     private string $database;
@@ -18,6 +19,7 @@ class Database {
         
         $this->driver = $env['DRIVER'];
         $this->host = $env['HOST'];
+        $this->port = $env['PORT'];
         $this->user = $env['USER'];
         $this->pass = $env['PASS'];
         $this->database = $env['DATABASE'];
@@ -26,7 +28,7 @@ class Database {
 
     public function connect() {
         try{
-            $connection = new PDO("$this->driver:host=$this->host; dbname=$this->database; charset=$this->charset", $this->user, $this->pass, [PDO::ATTR_PERSISTENT => false] );
+            $connection = new PDO("$this->driver:host=$this->host:$this->port; dbname=$this->database; charset=$this->charset", $this->user, $this->pass, [PDO::ATTR_PERSISTENT => false] );
             $connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             return $connection;
 
