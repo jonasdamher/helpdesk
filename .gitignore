@@ -1,0 +1,6 @@
+public/images/users/*
+public/images/articles/*
+/.env
+/vendor
+/.vscode
+/.DS_Store

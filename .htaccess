@@ -1,0 +1,80 @@
+IndexIgnore *
+Options +FollowSymLinks
+Options -Indexes
+
+ServerSignature Off
+
+<Files .htaccess>
+  Order allow,deny
+  Deny from all
+</Files>
+
+<Files ~ "\.(env|md|gitignore|gitattributes|lock)$">
+    Order allow,deny
+    Deny from all
+</Files>
+
+<IfModule mod_rewrite.c>
+
+  RewriteEngine On
+
+  #SECURITY
+  RewriteCond %{QUERY_STRING} (;|<|>|’|”|\)|%0A|%0D|%22|%27|%3C|%3E|%00).*(/\*|union|select|insert|cast|set|declare|drop|update|md5|benchmark) [NC,OR]
+  RewriteCond %{QUERY_STRING} \.\./\.\. [OR]
+  RewriteCond %{QUERY_STRING} (localhost|loopback|127\.0\.0\.1) [NC,OR]
+  RewriteCond %{QUERY_STRING} \.[a-z0-9] [NC,OR]
+  RewriteCond %{QUERY_STRING} (<|>|’|%0A|%0D|%27|%3C|%3E|%00) [NC]
+
+  RewriteCond %{REQUEST_METHOD} GET
+  RewriteCond %{QUERY_STRING} [a-zA-Z0-9_]=http:// [OR]
+  RewriteCond %{QUERY_STRING} [a-zA-Z0-9_]=(\.\.//?)+ [OR]
+  RewriteCond %{QUERY_STRING} [a-zA-Z0-9_]=/([a-z0-9_.]//?)+ [NC]
+
+  RewriteCond %{HTTP_USER_AGENT} ^$ [OR]
+  RewriteCond %{HTTP_USER_AGENT} ^(java|curl|wget) [NC,OR]
+  RewriteCond %{HTTP_USER_AGENT} (winhttp|HTTrack|clshttp|archiver|loader|email|harvest|extract|grab|miner) [NC,OR]
+  RewriteCond %{HTTP_USER_AGENT} (libwww-perl|curl|wget|python|nikto|scan) [NC,OR]
+  RewriteCond %{HTTP_USER_AGENT} (<|>|’|%0A|%0D|%27|%3C|%3E|%00) [NC]
+
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+
+  RewriteRule .* - [F]
+  RewriteRule ^(cache|includes|logs|tmp)/ - [F]
+
+  #HTTPS
+  RewriteCond %{SERVER_PORT} 80
+  RewriteRule ^(.*)$ https:/www.helpdesk.dev/$1 [R,L]
+
+  #ROUTES
+  RewriteRule ^([0-9a-zA-Z-_]+)/([0-9a-zA-Z-_]+)$ index.php?controller=$1&action=$2 [QSA]
+  RewriteRule ^([0-9a-zA-Z-_]+)$ index.php?controller=$1 [QSA]
+  RewriteRule ^([0-9a-zA-Z-_]+)/([0-9a-zA-Z-_]+)/([0-9]+)$ index.php?controller=$1&action=$2&id=$3 [QSA]
+
+</IfModule>
+
+#CACHE
+<IfModule mod_expires.c>
+  
+  ExpiresActive On
+
+  ExpiresByType font/ttf A432000
+  ExpiresByType font/woff A432000
+  ExpiresByType font/eot A432000
+  ExpiresByType font/woff2 A432000
+  ExpiresByType image/svg+xml A432000
+  ExpiresByType image/webp A432000
+  ExpiresByType image/png A432000
+  ExpiresByType text/css A432000
+  ExpiresByType text/javascript A432000
+  ExpiresByType application/javascript A432000
+  ExpiresByType application/x-javascript A432000
+
+</IfModule>
+
+#COMPRESSION
+<IfModule mod_brotli.c>
+  
+  SetOutputFilter BROTLI_COMPRESS
+
+</IfModule>
