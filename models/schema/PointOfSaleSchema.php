@@ -12,7 +12,7 @@ return [
 	'name' => [
 			'type' => 'string',
 			'required' => true,
-			'maxLength' => 32
+			'maxLength' => 64
 		],
 	'company_code' => [
 			'type' => 'string',
