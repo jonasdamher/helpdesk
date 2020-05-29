@@ -8,6 +8,9 @@ Proyecto realizado con PHP y jquery.
 * Versión de PHP 7.4.2.
 * Versión de Jquery 3.4.1.
 
+❮img src="local/example.gift" /❯
+![Interfaz de usuario](https://github.com/jonasdamher/helpdesk/blob/master/local/example.gif?raw=true)
+
 ### Requerimientos
 
 **Recursos para el proyecto en la carpeta local.**
