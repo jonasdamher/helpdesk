@@ -8,8 +8,8 @@ Proyecto realizado con PHP y jquery.
 * Versión de PHP 7.4.2.
 * Versión de Jquery 3.4.1.
 
-![Interfaz de usuario](https://github.com/jonasdamher/helpdesk/blob/master/local/example.gif?raw=true)
-![Interfaz de usuario](https://github.com/jonasdamher/helpdesk/blob/master/local/example-sm.gif?raw=true)
+<img src="https://github.com/jonasdamher/helpdesk/blob/master/local/example.gif?raw=true" align="left" />
+<img src="https://github.com/jonasdamher/helpdesk/blob/master/local/example-sm.gif?raw=true" align="right" />
 
 ## Requerimientos
 
