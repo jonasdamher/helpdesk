@@ -9,6 +9,7 @@ Proyecto realizado con PHP y jquery.
 * Versión de Jquery 3.4.1.
 
 ![Interfaz de usuario](https://github.com/jonasdamher/helpdesk/blob/master/local/example.gif?raw=true)
+![Interfaz de usuario](https://github.com/jonasdamher/helpdesk/blob/master/local/example-sm.gif?raw=true)
 
 ## Requerimientos
 
