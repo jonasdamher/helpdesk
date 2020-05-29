@@ -25,7 +25,7 @@ Interfaz en movil (experimental):
 ## Importante
 
 **Antes de empezar.**
-* Añadir certificado SSL a tu apache.
+* Añadir certificado SSL a tu servidor.
 * Ir al archivo .dev-env.
 * Renombrar archivo .dev-env como.env.
 * Agregar tus credenciales a la base de datos para realizar la conexión.
