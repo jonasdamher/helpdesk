@@ -3,9 +3,7 @@
 Es una webapp para administrar incidencias informáticas de puntos de venta de una empresa.
 
 Características:
-
 * Puedes controlador los usuarios, incidencias, artículos, proveedores, empresas de socios y sus puntos de venta.
-
 * Puedes administrar el stock de artículos en almacén, ver en que puntos de venta está un articulo en préstamo, ver en el almacen que artículos tienes de los puntos de venta para reparación o sustitución, ver de que proveedor es.
 
 ## Front-End
@@ -30,12 +28,10 @@ Móvil (experimental):
 Proyecto creado con la arquitectura MVC (Modelo, vista, controlador).
 
 Lenguajes de programación, Frameworks y sus versiones:
-
 * PHP 7.4.2
 * Jquery 3.4.1
 
 DDBB:
-
 * La base de datos está creada en MySQL.
 * Cotejamiento de tablas y DDBB: utf8mb4_general_ci.
 * Tipo de motor de almacenamiento: InnoDB.
