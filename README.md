@@ -16,11 +16,11 @@ Características:
 
 Escritorio:
 
-<img src="https://github.com/jonasdamher/helpdesk/blob/master/local/example.gif?raw=true" />
+<img align="center" width="460" src="https://github.com/jonasdamher/helpdesk/blob/master/local/example.gif?raw=true" />
 
 Móvil (experimental):
 
-<img src="https://github.com/jonasdamher/helpdesk/blob/master/local/example-sm.gif?raw=true" />
+<img align="center" src="https://github.com/jonasdamher/helpdesk/blob/master/local/example-sm.gif?raw=true" />
 
 
 ## Back-End
@@ -39,7 +39,7 @@ DDBB:
 * Tipo de motor de almacenamiento: InnoDB.
 * La DDBB se compone de 22 tablas.
 
-### Otros detalles
+## Otros detalles
 
 * Control de acceso de usuarios.
 * Uso de varios modelos en un mismo controlador.
@@ -52,8 +52,8 @@ DDBB:
 ## Requerimientos
 
 Recursos para el proyecto en la carpeta local:
-* Base de datos en carpeta local/db
-* Certificado autofirmado SSL en carpeta local/ssl
+* Base de datos en carpeta ```local/db```.
+* Certificado autofirmado SSL en carpeta ```local/ssl```.
 
 ## Importante
 
@@ -61,7 +61,7 @@ Antes de empezar:
 * Añadir certificado SSL autofirmado a tu servidor y a tu unidad certificadora de confianza.
 * Añadir nombre ```helpdesk``` a tu archivo host de tu pc.
 * Ir al archivo .dev-env.
-* Renombrar archivo .dev-env como.env.
-* Agregar tus credenciales a la base de datos para realizar la conexión.
+* Renombrar archivo ```.dev-env``` como ```.env```.
+* Agregar las credenciales a la base de datos para realizar la conexión (ya está por defecto).
 * Agregar credenciales de google.
-* Ir a la url ```https://helpdesk.dev/ ``` si tienes todo listo.
+* Ir a la url ```https://helpdesk.dev/``` si tienes todo listo.
