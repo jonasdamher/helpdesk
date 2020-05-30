@@ -1,3 +1,5 @@
+<img src="https://github.com/jonasdamher/helpdesk/blob/master/public/images/logo/launcher-3.png?raw=true" align="right" />
+
 # helpdesk
 
 Es una webapp para administrar incidencias informáticas de puntos de venta de una empresa.
