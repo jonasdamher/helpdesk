@@ -45,10 +45,7 @@ Esquema de relaciones:
 
 ## Otros detalles
 
-<img src="https://github.com/jonasdamher/helpdesk/blob/master/local/install-example.png?raw=true" align="right" />
-
 * Tiene la configuración básica de una PWA (aplicación web progresiva) para poder tener en tu dispositivo la web con acceso directo.
-
 * Control de acceso de usuarios.
 * Posibilidad de usar de varios modelos en un mismo controlador.
 * Validación y saneamiento de datos en Back-End.
