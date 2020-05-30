@@ -38,8 +38,9 @@ DDBB:
 * La DDBB se compone de 22 tablas.
 
 Esquema de relaciones:
-<img width="520" src="https://github.com/jonasdamher/helpdesk/blob/master/local/relations-example.png?raw=true" />
-
+<p align="center">
+<img src="https://github.com/jonasdamher/helpdesk/blob/master/local/relations-example.png?raw=true" />
+</p>
 ## Otros detalles
 
 * Control de acceso de usuarios.
