@@ -12,6 +12,7 @@ Características:
 
 * Diseño adaptable a móvil y tablet.
 * Interfaz liviana y simple.
+* Para diseñar los estilos y cada modelo adaptable usé CSS3.
 * Todo el diseño está hecho desde 0, sin Frameworks como Bootstrap, todo “hand made”.
 
 Escritorio:
@@ -26,7 +27,7 @@ Móvil (experimental):
 
 ## Back-End
 
-Proyecto creado con la arquitectura MVC (Modelo, vista, controlador).
+Proyecto creado con el estilo de arquitectura MVC (Modelo, vista, controlador), usando el paradigma OOP (Programación orientada a objetos).
 
 Lenguajes de programación, Frameworks y sus versiones:
 * PHP 7.4.2
