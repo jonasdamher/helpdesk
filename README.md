@@ -43,6 +43,7 @@ Esquema de relaciones:
 
 ## Otros detalles
 
+* Tiene la configuración básica de una PWA (aplicación web progresiva).
 * Control de acceso de usuarios.
 * Posibilidad de usar de varios modelos en un mismo controlador.
 * Validación y saneamiento de datos en Back-End.
