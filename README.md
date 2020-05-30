@@ -14,14 +14,13 @@ Características:
 
 Escritorio:
 <p align="center">
-<img width="520" src="https://github.com/jonasdamher/helpdesk/blob/master/local/example.gif?raw=true" />
+<img src="https://github.com/jonasdamher/helpdesk/blob/master/local/example.gif?raw=true" />
 </p>
 
 Móvil (experimental):
 <p align="center">
 <img src="https://github.com/jonasdamher/helpdesk/blob/master/local/example-sm.gif?raw=true" />
 </p>
-
 
 ## Back-End
 
@@ -41,6 +40,7 @@ Esquema de relaciones:
 <p align="center">
 <img src="https://github.com/jonasdamher/helpdesk/blob/master/local/relations-example.png?raw=true" />
 </p>
+
 ## Otros detalles
 
 * Control de acceso de usuarios.
