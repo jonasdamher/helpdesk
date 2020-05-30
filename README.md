@@ -3,8 +3,8 @@
 Es una webapp para administrar incidencias informáticas de puntos de venta de una empresa.
 
 Características:
-* Puedes controlador los usuarios, incidencias, artículos, proveedores, empresas de socios y sus puntos de venta.
-* Puedes administrar el stock de artículos en almacén, ver en que puntos de venta está un articulo en préstamo, ver en el almacen que artículos tienes de los puntos de venta para reparación o sustitución, ver de que proveedor es.
+* Puedes administrar los usuarios, incidencias, artículos, proveedores, empresas de socios y sus puntos de venta.
+* Puedes controlar el stock de artículos en almacén, ver en que puntos de venta está un artículo en préstamo, ver en el almacen que artículos tienes de los puntos de venta para reparación o sustitución, ver de que proveedor es el artículo.
 
 ## Front-End
 
