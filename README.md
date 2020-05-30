@@ -14,7 +14,7 @@ Características:
 
 Escritorio:
 <p align="center">
-<img width="460" src="https://github.com/jonasdamher/helpdesk/blob/master/local/example.gif?raw=true" />
+<img width="520" src="https://github.com/jonasdamher/helpdesk/blob/master/local/example.gif?raw=true" />
 </p>
 
 Móvil (experimental):
@@ -34,8 +34,11 @@ Lenguajes de programación, Frameworks y sus versiones:
 DDBB:
 * La base de datos está creada en MySQL.
 * Cotejamiento de tablas y DDBB: utf8mb4_general_ci.
-* Tipo de motor de almacenamiento: InnoDB.
+* Tipo de motor de almacenamiento en todas las tablas: InnoDB.
 * La DDBB se compone de 22 tablas.
+
+Esquema de relaciones:
+<img width="520" src="https://github.com/jonasdamher/helpdesk/blob/master/local/relations-example.png?raw=true" />
 
 ## Otros detalles
 
