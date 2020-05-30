@@ -40,8 +40,9 @@ DDBB:
 ## Otros detalles
 
 * Control de acceso de usuarios.
-* Uso de varios modelos en un mismo controlador.
-* Validación de datos.
+* Posibilidad de usar de varios modelos en un mismo controlador.
+* Validación y saneamiento de datos en Back-End.
+* Optimización de imagenes.
 * Gestor de peticiones con AJAX.
 * Url amigables.
 * Compresión de archivos con brotli.
