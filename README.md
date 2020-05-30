@@ -15,12 +15,14 @@ Características:
 * Todo el diseño está hecho desde 0, sin Frameworks como Bootstrap, todo “hand made”.
 
 Escritorio:
-
-<img align="center" width="460" src="https://github.com/jonasdamher/helpdesk/blob/master/local/example.gif?raw=true" />
+<p align="center">
+<img width="460" src="https://github.com/jonasdamher/helpdesk/blob/master/local/example.gif?raw=true" />
+</p>
 
 Móvil (experimental):
-
-<img align="center" src="https://github.com/jonasdamher/helpdesk/blob/master/local/example-sm.gif?raw=true" />
+<p align="center">
+<img src="https://github.com/jonasdamher/helpdesk/blob/master/local/example-sm.gif?raw=true" />
+</p>
 
 
 ## Back-End
