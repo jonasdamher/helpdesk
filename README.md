@@ -1,8 +1,8 @@
 <img src="https://github.com/jonasdamher/helpdesk/blob/master/public/images/logo/launcher-3.png?raw=true" align="right" width="128" />
 
-# helpdesk :rocket: 
+# helpdesk
 
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/jonasdamher/helpdesk/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/jonasdamher/helpdesk/?branch=master) [![Build Status](https://scrutinizer-ci.com/g/jonasdamher/helpdesk/badges/build.png?b=master)](https://scrutinizer-ci.com/g/jonasdamher/helpdesk/build-status/master)
+![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/jonasdamher/helpdesk) [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/jonasdamher/helpdesk/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/jonasdamher/helpdesk/?branch=master) [![Build Status](https://scrutinizer-ci.com/g/jonasdamher/helpdesk/badges/build.png?b=master)](https://scrutinizer-ci.com/g/jonasdamher/helpdesk/build-status/master) [![GitHub license](https://img.shields.io/github/license/jonasdamher/helpdesk)](https://github.com/jonasdamher/helpdesk/blob/master/LICENSE) 
 
 > Es una webapp para administrar incidencias informáticas de puntos de venta de una empresa.
 
