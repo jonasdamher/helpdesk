@@ -78,9 +78,7 @@ Recursos para el proyecto en la carpeta local:
 * Base de datos en carpeta ```local/db```.
 * Certificado autofirmado SSL en carpeta ```local/ssl```.
 
-<div style="display: flex; align-items: center;">
- ## Importante <div style="padding-left:1rem;">:exclamation:</div> 
-</div>
+ ## Importante :exclamation:
 
 Antes de empezar:
 * Añadir certificado SSL autofirmado a tu servidor y a tu unidad certificadora de confianza.
