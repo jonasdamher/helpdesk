@@ -8,7 +8,7 @@ Características:
 * Puedes administrar los usuarios, incidencias, artículos, proveedores, empresas de socios y sus puntos de venta.
 * Puedes controlar el stock de artículos en almacén, ver en que puntos de venta está un artículo en préstamo, ver en el almacen que artículos tienes de los puntos de venta para reparación o sustitución, ver de que proveedor es el artículo.
 
-## Planteamiento del proyecto
+## Planteamiento del proyecto :page_facing_up: 
 
 Idea principal y pasos a realizar:
 * Un punto de venta necesita la reparacion de un dispositivo.
@@ -22,7 +22,7 @@ Idea principal y pasos a realizar:
   * Si el/la responsable declina el presupuesto, el punto de venta se queda el dispositivo de sustitución por el momento.
 * Se finaliza la incidencia si lo requiere.
 
-## Front-End
+## Front-End :rainbow: 
 
 * Diseño adaptable a móvil y tablet.
 * Interfaz liviana y simple.
@@ -39,7 +39,7 @@ Móvil (experimental):
 <img src="https://github.com/jonasdamher/helpdesk/blob/master/local/example-sm.gif?raw=true" />
 </p>
 
-## Back-End
+## Back-End :rocket: 
 
 Proyecto creado con el estilo de arquitectura MVC (Modelo, vista, controlador), usando el paradigma OOP (Programación orientada a objetos).
 
@@ -58,7 +58,7 @@ Esquema de relaciones:
 <img src="https://github.com/jonasdamher/helpdesk/blob/master/local/relations-example.png?raw=true" />
 </p>
 
-## Otros detalles
+## Otros detalles :triangular_flag_on_post: 
 
 * Tiene la configuración básica de una PWA (aplicación web progresiva) para poder tener en tu dispositivo la web con acceso directo.
 * Control de acceso de usuarios.
@@ -70,13 +70,13 @@ Esquema de relaciones:
 * Compresión de archivos con brotli.
 * Se puede usar un archivo .env para agregar las credenciales a la conexión a la base de datos y para agregar otras credenciales privadas de APIkey, etc.
 
-## Requerimientos
+## Requerimientos :clipboard: 
 
 Recursos para el proyecto en la carpeta local:
 * Base de datos en carpeta ```local/db```.
 * Certificado autofirmado SSL en carpeta ```local/ssl```.
 
-## Importante
+## Importante :exclamation: 
 
 Antes de empezar:
 * Añadir certificado SSL autofirmado a tu servidor y a tu unidad certificadora de confianza.
