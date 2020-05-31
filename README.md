@@ -18,7 +18,7 @@ Idea principal y pasos a realizar:
 * Un operario registra la incidencia en la webapp.
 * Un operario con la incidencia asignada procede a ir buscar el dispositivo estropeado para dicha reparación y se sustituye el dispositivo estropeado por uno del almacén.
 * Se trata de reparar el dispositivo del punto de venta.
-  * Si no es posible el punto de venta se queda con el dispositivo en prestamo y el operario pide presupuesto para uno nuevo.
+* Si no es posible el punto de venta se queda con el dispositivo en prestamo y el operario pide presupuesto para uno nuevo.
   * Despues el responsable del punto de venta acepta/declina el presupuesto.
   * Si se acepta se procede a comprar el dispositivo nuevo y despues a darle la factura y una copia del albarán al responsable del punto  de venta. 
   * Si el/la responsable declina el presupuesto, el punto de venta se queda el dispositivo de sustitución por el momento.
