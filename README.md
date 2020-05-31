@@ -1,6 +1,8 @@
 <img src="https://github.com/jonasdamher/helpdesk/blob/master/public/images/logo/launcher-3.png?raw=true" align="right" width="128" />
 
-# helpdesk
+# helpdesk :rocket: 
+
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/jonasdamher/helpdesk/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/jonasdamher/helpdesk/?branch=master) [![Build Status](https://scrutinizer-ci.com/g/jonasdamher/helpdesk/badges/build.png?b=master)](https://scrutinizer-ci.com/g/jonasdamher/helpdesk/build-status/master)
 
 > Es una webapp para administrar incidencias informáticas de puntos de venta de una empresa.
 
@@ -39,7 +41,7 @@ Móvil (experimental):
 <img src="https://github.com/jonasdamher/helpdesk/blob/master/local/example-sm.gif?raw=true" />
 </p>
 
-## Back-End :rocket: 
+## Back-End :gear: 
 
 Proyecto creado con el estilo de arquitectura MVC (Modelo, vista, controlador), usando el paradigma OOP (Programación orientada a objetos).
 
