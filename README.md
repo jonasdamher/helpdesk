@@ -1,4 +1,4 @@
-<img src="https://github.com/jonasdamher/helpdesk/blob/master/public/images/logo/launcher-3.png?raw=true" align="right" width="74" />
+<img src="https://github.com/jonasdamher/helpdesk/blob/master/public/images/logo/launcher-3.png?raw=true" align="right" width="128" />
 
 # helpdesk
 
