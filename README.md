@@ -1,8 +1,8 @@
-<img src="https://github.com/jonasdamher/helpdesk/blob/master/public/images/logo/launcher-3.png?raw=true" align="right" width="64" />
+<img src="https://github.com/jonasdamher/helpdesk/blob/master/public/images/logo/launcher-3.png?raw=true" align="right" width="74" />
 
 # helpdesk
 
-Es una webapp para administrar incidencias informáticas de puntos de venta de una empresa.
+> Es una webapp para administrar incidencias informáticas de puntos de venta de una empresa.
 
 Características:
 * Puedes administrar los usuarios, incidencias, artículos, proveedores, empresas de socios y sus puntos de venta.
