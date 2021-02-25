@@ -1,7 +1,9 @@
-<?php 
+<?php
 
+declare(strict_types=1);
 
-class CompanyModel extends BaseModel implements Crud {
+class CompanyModel extends BaseModel
+{
 
     private int $id;
     private string $tradename;
@@ -9,61 +11,70 @@ class CompanyModel extends BaseModel implements Crud {
     private string $cif;
     private int $idStatus;
 
-    public function __construct($conn) {
-        parent::__construct();
-        $this->conn = $conn;
+    public function __construct()
+    {
         $this->table = 'companies';
-        $this->setSchema('CompanySchema');
     }
 
     // GET & SET
 
-    public function getId() {
+    public function getId()
+    {
         return $this->id;
     }
 
-    public function setId(int $id) {
+    public function setId(int $id)
+    {
         $this->id = $id;
     }
 
-    public function getTradename() {
+    public function getTradename()
+    {
         return $this->tradename;
     }
 
-    public function setTradename(string $tradename) {
+    public function setTradename(string $tradename)
+    {
         $this->tradename = $tradename;
     }
 
-    public function getbusinessName() {
+    public function getbusinessName()
+    {
         return $this->businessName;
     }
 
-    public function setbusinessName(string $business_name) {
+    public function setbusinessName(string $business_name)
+    {
         $this->businessName = $business_name;
     }
 
-    public function getCif() {
+    public function getCif()
+    {
         return $this->cif;
     }
 
-    public function setCif(string $cif) {
+    public function setCif(string $cif)
+    {
         $this->cif = $cif;
     }
-    
-    public function getIdStatus() {
+
+    public function getIdStatus()
+    {
         return $this->idStatus;
     }
 
-    public function setIdStatus(int $idStatus) {
+    public function setIdStatus(int $idStatus)
+    {
         $this->idStatus = $idStatus;
     }
 
     /**
      *  METHODS
      *  PRIVATES METHODS
-    */ 
+     */
 
-    private function queryCompany() {
+    private function queryCompany()
+    {
 
         require_once 'libs/QueryBuild.php';
         $build = new QueryBuild();
@@ -72,31 +83,34 @@ class CompanyModel extends BaseModel implements Crud {
         $build->setFrom($this->table);
         $build->setInner("INNER JOIN comp_status ON $this->table._id_status = comp_status._id");
         $build->setSearch("$this->table.tradename LIKE :search OR $this->table.business_name LIKE :search OR $this->table.cif LIKE :search");
-            
+
         return $build->query();
     }
 
     //  PUBLICS METHODS
-    public function read() {
-        return $this->getById($this->getId() );
+    public function read()
+    {
+        return $this->getById($this->getId());
     }
 
-    public function readAll() {
-        return $this->getAllQuery($this->queryCompany() );
+    public function readAll()
+    {
+        return $this->getAllQuery($this->queryCompany());
     }
 
-    public function create() {
+    public function create()
+    {
         try {
-            
-            $existCif = $this->getBy('cif', $this->getCif() );
-            
-            if(!($existCif) ) {
 
-                $existBusinessName = $this->getBy('business_name', $this->getbusinessName() );
-            
-                if(!($existBusinessName) ) {
+            $existCif = $this->getBy('cif', $this->getCif());
 
-                    $userNew = $this->connect()->prepare(
+            if (!($existCif)) {
+
+                $existBusinessName = $this->getBy('business_name', $this->getbusinessName());
+
+                if (!($existBusinessName)) {
+
+                    $userNew = Database::connect()->prepare(
                         "INSERT 
                         INTO $this->table 
                         (tradename, 
@@ -110,40 +124,37 @@ class CompanyModel extends BaseModel implements Crud {
                     $userNew->bindValue(':business', $this->getbusinessName(), PDO::PARAM_STR);
                     $userNew->bindValue(':cif', $this->getCif(), PDO::PARAM_STR);
                     $userNew->bindValue(':idStatus', $this->getIdStatus(), PDO::PARAM_STR);
-                    
-                    if($userNew->execute() ) {
+
+                    if ($userNew->execute()) {
                         return 'Empresa registrada.';
-                    }else {
+                    } else {
                         return 'Hubo un error al registrar la empresa, intentalo mas tarde';
                     }
-                    
-                }else {
-                    return 'La razón social "'.$this->getbusinessName().'" ya está registrada.';   
+                } else {
+                    return 'La razón social "' . $this->getbusinessName() . '" ya está registrada.';
                 }
-
-            }else {
-                return 'El cif "'.$this->getCif().'" ya está registrado.';
+            } else {
+                return 'El cif "' . $this->getCif() . '" ya está registrado.';
             }
+        } catch (PDOexception $e) {
 
-        }catch(PDOexception $e) {
-            
             return $e->getMessage();
-
         }
     }
 
-    public function update() {
+    public function update()
+    {
         try {
-               
-            $existCif = $this->getBy('cif', $this->getCif() );
 
-            if(!($existCif && $existCif['_id'] != $this->getId() ) ) {
+            $existCif = $this->getBy('cif', $this->getCif());
 
-                $existBusinessName = $this->getBy('business_name', $this->getbusinessName() );
-                
-                if(!($existBusinessName && $existBusinessName['_id'] != $this->getId() ) ) {
-             
-                    $update = $this->connect()->prepare(
+            if (!($existCif && $existCif['_id'] != $this->getId())) {
+
+                $existBusinessName = $this->getBy('business_name', $this->getbusinessName());
+
+                if (!($existBusinessName && $existBusinessName['_id'] != $this->getId())) {
+
+                    $update = Database::connect()->prepare(
                         "UPDATE 
                         $this->table 
                         SET 
@@ -153,46 +164,42 @@ class CompanyModel extends BaseModel implements Crud {
                         _id_status = :status
                         WHERE _id = :id"
                     );
-                    
+
                     $update->bindValue(':tradename', $this->getTradename(), PDO::PARAM_STR);
                     $update->bindValue(':business', $this->getbusinessName(), PDO::PARAM_STR);
                     $update->bindValue(':cif', $this->getCif(), PDO::PARAM_STR);
                     $update->bindValue(':status', $this->getIdStatus(), PDO::PARAM_INT);
                     $update->bindValue(':id', $this->getId(), PDO::PARAM_INT);
 
-                    if($update->execute() ) {
+                    if ($update->execute()) {
 
-                        header('Location: '.url_base.$_GET['controller'].'/'.$_GET['action'].'/'.$_GET['id'].'?status=1');
-
-                    }else {
-                        header('Location: '.url_base.$_GET['controller'].'/'.$_GET['action'].'/'.$_GET['id'].'?status=0');
+                        header('Location: ' . URL_BASE . $_GET['controller'] . '/' . $_GET['action'] . '/' . $_GET['id'] . '?status=1');
+                    } else {
+                        header('Location: ' . URL_BASE . $_GET['controller'] . '/' . $_GET['action'] . '/' . $_GET['id'] . '?status=0');
                     }
                 }
-              
-            }else {
-                return 'El correo "'.$this->getEmail().'" ya está registrado.';
+            } else {
+                return 'El correo "' . $this->getEmail() . '" ya está registrado.';
             }
-           
+        } catch (PDOexception $e) {
 
-        }catch(PDOexception $e) {
-            
             return $e->getMessage();
         }
     }
 
-    public function delete() {
-
+    public function delete()
+    {
     }
 
     // OTHERS METHODS
 
-    public function paginations() {
-        return $this->pagination('paginations', $this->queryCompany() );
+    public function paginations()
+    {
+        return $this->pagination('paginations', $this->queryCompany());
     }
 
-    public function getStatus() {
+    public function getStatus()
+    {
         return $this->getAllOtherTable('comp_status');
     }
 }
-
-?>

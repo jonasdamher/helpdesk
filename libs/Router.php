@@ -1,78 +1,52 @@
-<?php 
+<?php
 
-class Router {
+declare(strict_types=1);
 
-    private string $name_controller;
-    private string $name_action;
+$controllerName = ucfirst(filter_var(trim(($_GET['controller'] ?? 'login')), FILTER_SANITIZE_STRING));
+$actionName = filter_var(trim(($_GET['action'] ?? 'index')), FILTER_SANITIZE_STRING);
 
-    public function __construct() {
-        $this->setNameController();
-        $this->setNameAction();
-        $this->controller();
-    }
+Auth::path([$controllerName, $actionName]);
 
-    private function getNameController() {
-        return $this->name_controller;
-    }
+$path = '';
+$api = filter_var(trim(($_GET['api'] ?? '')), FILTER_SANITIZE_STRING);
 
-    private function setNameController() {
-        $this->name_controller = trim(($_GET['controller'] ?? controller_default) );
-    }
+switch ($api) {
+    case 'api':
+        require_once 'core/Api.php';
 
-    private function getNameAction() {
-        return $this->name_action;
-    }
+        $path = 'api/' . API_VERSION . '/';
+        $controllerName = $controllerName . 'Api';
+        break;
+    default:
+        require_once 'helpers/Head.php';
+        require_once 'helpers/Footer.php';
+        require_once 'helpers/View.php';
+        require_once 'helpers/Menu.php';
+        require_once 'core/Controller.php';
 
-    private function setNameAction() {
-        $this->name_action = trim(($_GET['action'] ?? action_default) );
-    }
-
-    private function controller() {
-        
-        $name_controller = $this->getNameController();
-
-        if(isset($name_controller) ) {
-
-            $name_controller = $name_controller.'Controller';
-            
-            if(file_exists('controllers/'.$name_controller.'.php') ) {
-
-                if(class_exists($name_controller) ) {
-            
-                    $controller = new $name_controller();
-                    $this->action($controller);
-
-                }else{
-                    ErrorHandler::response(404);
-                }
-
-            }else{
-                ErrorHandler::response(404);
-            }
-            
-        }else{
-            ErrorHandler::response(500);
-        }
-    }
-
-    private function action($controller) {
-        $action = $this->getNameAction();
-
-        if(!empty($action) ) {
-
-            if(method_exists($controller, $action) ) {
-                $controller->$action();
-
-            }else{
-                ErrorHandler::response(404);
-            }
-
-        }else {
-            ErrorHandler::response(500);
-        }
-
-    }
-
+        $path = 'controllers/';
+        $controllerName = $controllerName . 'Controller';
+        break;
 }
 
-?>
+require_once 'libs/autoload.php';
+
+if (!file_exists($path . $controllerName . '.php')) {
+    ErrorHandler::response(404);
+}
+
+if (!class_exists($controllerName)) {
+    ErrorHandler::response(404);
+}
+
+$controller = new $controllerName();
+
+if (empty($actionName)) {
+    ErrorHandler::response(500);
+}
+
+if (!method_exists($controller, $actionName)) {
+    ErrorHandler::response(404);
+}
+
+$controller->$actionName();

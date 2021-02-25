@@ -1,44 +1,31 @@
-<?php 
+<?php
 
-require_once 'BaseController.php';
+declare(strict_types=1);
 
-class LoginController extends BaseController {
+class LoginController extends Controller
+{
 
-    public function __construct() {
-        $this->permission([0]);
-        parent::__construct(['user']);
+    public function __construct()
+    {
+        Auth::check();
+        $this->loadModels(['user']);
     }
 
-    public function index() {   
+    public function index()
+    {
+        if ($this->submitForm()) {
 
-        if($this->submitForm() ) {
+            $email = $_POST['email'];
+            $password = $_POST['password'];
 
-            $recaptcha = require_once 'libs/recaptcha.php';
+            $this->model('user')->setEmail($email);
+            $this->model('user')->setPassword($password);
 
-            if($recaptcha && isset($recaptcha->score) && $recaptcha->score >= 0.6) {
-
-                $validator = $this->model('user')->formValidate('only');
-
-                if($validator['valid']) {
-
-                    $schema = $validator['schema'];
-
-                    $this->model('user')->setEmail($schema['email']);
-                    $this->model('user')->setPassword($schema['password']);
-
-                    $this->setResponseMessage($this->model('user')->login());
-
-                }else {
-                    $this->setResponseMessage($validator['errors']);    
-                }
-            }else {
-                $this->setResponseMessage('Hubo un error al verificar reCAPTCHA, intentalo de nuevo.');    
-            }
+            $login = $this->model('user')->login();
+            $this->setResponseMessage($login['message']);
         }
 
-        include $this->view('user/login');
+        Head::title('Iniciar sesión');
+        include View::render('user', 'login');
     }
-
 }
-
-?>

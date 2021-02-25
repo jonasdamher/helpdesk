@@ -1,31 +1,35 @@
-<?php 
+<?php
 
-require_once 'BaseController.php';
+declare(strict_types=1);
 
-class SupplierController extends BaseController {
+class SupplierController extends Controller
+{
 
-    public function __construct() {
-        $this->permission([1, 2]);
-        parent::__construct(['supplier']);
+    public function __construct()
+    {
+        Auth::access();
+        $this->loadModels(['supplier']);
     }
 
-    public function index() {   
+    public function index()
+    {
 
         $suppliers = $this->model('supplier')->readAll();
         $pagination = $this->model('supplier')->paginations();
 
-        include $this->view('supplier/index');
+        include View::render('supplier');
     }
 
-    public function new() {
-   
+    public function new()
+    {
+
         $countries = $this->model('supplier')->getCountries();
-        
-        if($this->submitForm() ) {
+
+        if ($this->submitForm()) {
 
             $validator = $this->model('supplier')->formValidate('all');
 
-            if($validator['valid']) {
+            if ($validator['valid']) {
 
                 $schema = $validator['schema'];
 
@@ -40,18 +44,17 @@ class SupplierController extends BaseController {
                 $this->model('supplier')->setPhone($schema['phone']);
                 $this->model('supplier')->setEmail($schema['email']);
 
-                $this->setResponseMessage($this->model('supplier')->create() );
-
-            }else {
-                $this->setResponseMessage($validator['errors']);    
+                $this->setResponseMessage($this->model('supplier')->create());
+            } else {
+                $this->setResponseMessage($validator['errors']);
             }
-            
         }
-        
-        include $this->view('supplier/new');
+
+        include View::render('supplier', 'new');
     }
 
-    public function update() {
+    public function update()
+    {
 
         $this->model('supplier')->setId($_GET['id']);
 
@@ -59,11 +62,11 @@ class SupplierController extends BaseController {
         $countries = $this->model('supplier')->getCountries();
         $country = Utils::nameDatalist($countries, $supplier['_id_country'], 'name');
 
-        if($this->submitForm() ) {
+        if ($this->submitForm()) {
 
             $validator = $this->model('supplier')->formValidate('all');
 
-            if($validator['valid']) {
+            if ($validator['valid']) {
 
                 $schema = $validator['schema'];
 
@@ -78,17 +81,12 @@ class SupplierController extends BaseController {
                 $this->model('supplier')->setPhone($schema['phone']);
                 $this->model('supplier')->setEmail($schema['email']);
 
-                $this->setResponseMessage($this->model('supplier')->update() );
-
-            }else {
-                $this->setResponseMessage($validator['errors']);    
+                $this->setResponseMessage($this->model('supplier')->update());
+            } else {
+                $this->setResponseMessage($validator['errors']);
             }
-            
         }
-        
-        include $this->view('supplier/update');
+
+        include View::render('supplier', 'update');
     }
-
 }
-
-?>

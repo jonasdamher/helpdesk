@@ -1,24 +1,28 @@
+'use strict';
+
 const CACHE_NAME = 'cache-v1';
+
 var urlsToCache = [
   'public/webfonts/fa-solid-900.woff2',
   'public/css/all.min.css',
   'public/css/main.css',
-  'public/js/jquery-3.4.1.min.js',
+  'public/js/jquery-3.5.1.min.js',
   'public/js/all.min.js',
   'public/js/material.js',
   'public/js/main.js',
-  'public/offline.html'
+  'public/offline.html',
+  'public/images/logo/favicon.ico'
 ];
 
-self.addEventListener('install', function(event) {
+self.addEventListener('install', function (event) {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(function(cache) {
-        return cache.addAll(urlsToCache);
-      })
+    caches.open(CACHE_NAME).then(function (cache) {
+      return cache.addAll(urlsToCache);
+    })
   );
 });
 
-self.addEventListener('activate', function(event) {
+self.addEventListener('activate', function (event) {
   event.waitUntil(
     caches.keys().then((keyList) => {
       return Promise.all(keyList.map((key) => {
@@ -30,11 +34,11 @@ self.addEventListener('activate', function(event) {
   );
 });
 
-self.addEventListener('fetch', function(event) {
-  if(event.request.mode === 'navigate') {
+self.addEventListener('fetch', function (event) {
+  if (event.request.mode === 'navigate') {
     event.respondWith(fetch(event.request).catch(() => {
       return caches.open(CACHE_NAME).then((cache) => {
-        return cache.match('public/offline.html');
+        return cache.match('/public/offline.html');
       });
     }));
   }

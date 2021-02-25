@@ -1,28 +1,31 @@
-<?php 
+<?php
 
-require_once 'BaseController.php';
+declare(strict_types=1);
 
-class ArticleController extends BaseController {
+class ArticleController extends Controller
+{
 
-    public function __construct() {
-        $this->permission([1, 2]);
-        parent::__construct(['generalArticle', 'article']);
+    public function __construct()
+    {
+        Auth::access();
+        $this->loadModels(['generalArticle', 'article']);
     }
 
-    public function index() {   
-
+    public function index()
+    {
         $articles = $this->model('generalArticle')->readAll();
         $pagination = $this->model('generalArticle')->paginations();
 
-        include $this->view('article/index');
+        include View::render('article');
     }
 
-    public function details() {
-        
+    public function details()
+    {
+
         // GENERAL ARTICLE
         $this->model('generalArticle')->setId($_GET['id']);
         $generalArticle = $this->model('generalArticle')->getDetails();
-        
+
         // ARTICLE ONLY
         $this->model('article')->setIdArticle($_GET['id']);
         $articles = $this->model('article')->readAll();
@@ -31,22 +34,23 @@ class ArticleController extends BaseController {
 
         $articlesTotalBorrowed = $this->model('article')->totalBorrowed();
 
-        include $this->view('article/details');
+        include View::render('article', 'details');
     }
 
-    public function new() {
+    public function new()
+    {
 
         $types = $this->model('generalArticle')->getArticlesTypes();
         $providers = $this->model('generalArticle')->getProviders();
-        
-        if($this->submitForm() ) {
+
+        if ($this->submitForm()) {
 
             $validator = $this->model('generalArticle')->formValidate('all');
 
-            if($validator['valid']) {
+            if ($validator['valid']) {
 
                 $schema = $validator['schema'];
-                
+
                 $this->model('generalArticle')->setName($schema['name']);
                 $this->model('generalArticle')->setDescription($schema['description']);
                 $this->model('generalArticle')->setBarcode($schema['barcode']);
@@ -57,16 +61,16 @@ class ArticleController extends BaseController {
                 $this->model('generalArticle')->setImage('image');
 
                 $this->setResponseMessage($this->model('generalArticle')->create());
-
-            }else {
-                $this->setResponseMessage($validator['errors']);    
+            } else {
+                $this->setResponseMessage($validator['errors']);
             }
         }
-        
-        include $this->view('article/new');
+
+        include View::render('article', 'new');
     }
 
-    public function update() {
+    public function update()
+    {
 
         $this->model('generalArticle')->setId($_GET['id']);
 
@@ -74,15 +78,15 @@ class ArticleController extends BaseController {
 
         $types = $this->model('generalArticle')->getArticlesTypes();
         $providers = $this->model('generalArticle')->getProviders();
-        
-        if($this->submitForm() ) {
+
+        if ($this->submitForm()) {
 
             $validator = $this->model('generalArticle')->formValidate('all');
 
-            if($validator['valid']) {
+            if ($validator['valid']) {
 
                 $schema = $validator['schema'];
-                           
+
                 $this->model('generalArticle')->setName($schema['name']);
                 $this->model('generalArticle')->setDescription($schema['description']);
                 $this->model('generalArticle')->setBarcode($schema['barcode']);
@@ -93,15 +97,11 @@ class ArticleController extends BaseController {
                 $this->model('generalArticle')->setImage('image');
 
                 $this->setResponseMessage($this->model('generalArticle')->update());
-
-            }else {
-                $this->setResponseMessage($validator['errors']);    
+            } else {
+                $this->setResponseMessage($validator['errors']);
             }
         }
 
-        include $this->view('article/update');
+        include View::render('article', 'update');
     }
-
 }
-
-?>

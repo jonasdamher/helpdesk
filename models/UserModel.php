@@ -1,6 +1,9 @@
-<?php 
+<?php
 
-class UserModel extends BaseModel implements Crud {
+declare(strict_types=1);
+
+class UserModel extends BaseModel
+{
 
     private int $id;
     private string $name;
@@ -11,86 +14,98 @@ class UserModel extends BaseModel implements Crud {
     private int $idStatus;
     private $image;
 
-    public function __construct($conn) {
-        parent::__construct();
-        $this->conn = $conn;
+    public function __construct()
+    {
         $this->table = 'users';
-        $this->setSchema('UserSchema');
     }
 
-    // GET & SET
-
-    public function getId() {
+    public function getId()
+    {
         return $this->id;
     }
 
-    public function setId(int $id) {
+    public function setId(int $id): void
+    {
         $this->id = $id;
     }
 
-    public function getName() {
+    public function getName()
+    {
         return $this->name;
     }
 
-    public function setName(string $name) {
+    public function setName(string $name): void
+    {
         $this->name = $name;
     }
 
-    public function getLastname() {
+    public function getLastname()
+    {
         return $this->lastname;
     }
 
-    public function setLastname(string $lastname) {
+    public function setLastname(string $lastname): void
+    {
         $this->lastname = $lastname;
     }
 
-    public function getEmail() {
+    public function getEmail()
+    {
         return $this->email;
     }
 
-    public function setEmail(string $email) {
+    public function setEmail(string $email): void
+    {
         $this->email = $email;
-        
     }
-    
-    public function getPassword() {
+
+    public function getPassword()
+    {
         return $this->password;
     }
 
-    public function setPassword(string $password) {
+    public function setPassword(string $password): void
+    {
         $this->password = $password;
     }
 
-    public function getIdRol() {
+    public function getIdRol()
+    {
         return $this->idRol;
     }
 
-    public function setIdRol(int $id_rol) {
+    public function setIdRol(int $id_rol): void
+    {
         $this->idRol = $id_rol;
     }
 
-    public function getIdStatus() {
+    public function getIdStatus()
+    {
         return $this->idStatus;
     }
 
-    public function setIdStatus(int $id_status) {
+    public function setIdStatus(int $id_status): void
+    {
         $this->idStatus = $id_status;
     }
 
-    public function getImage() {
+    public function getImage()
+    {
         return $this->image;
     }
 
-    public function setImage($image) {
+    public function setImage($image): void
+    {
         $this->image = $image;
     }
 
     /**
      *  METHODS
      *  PRIVATES METHODS
-    */ 
+     */
 
-    private function queryUsers() {
+    private function queryUsers(): array
+    {
 
         require_once 'libs/QueryBuild.php';
         $build = new QueryBuild();
@@ -99,85 +114,162 @@ class UserModel extends BaseModel implements Crud {
         $build->setFrom($this->table);
         $build->setInner("INNER JOIN usr_rol ON $this->table._id_rol = usr_rol._id INNER JOIN usr_status ON $this->table._id_status = usr_status._id");
         $build->setSearch("$this->table.name LIKE :search OR $this->table.lastname LIKE :search OR $this->table.email LIKE :search");
-            
+
         return $build->query();
     }
 
-    private function _passHas() {
+    private function passHas(): string
+    {
         return password_hash($this->getPassword(), PASSWORD_DEFAULT);
     }
 
-    private function _sessionUser($userData) {
-
-        $_SESSION['user_init']  = $userData['_id'];
-        $_SESSION['name']       = $userData['name'];
-        $_SESSION['lastname']   = $userData['lastname'];
-        $_SESSION['email']      = $userData['email'];
-        $_SESSION['rol']        = $userData['_id_rol'];
-        $_SESSION['image']      = $userData['image'];
+    private function sessionUser($userData): void
+    {
+        $_SESSION['user_init'] = (int) $userData['_id'];
+        $_SESSION['name'] = $userData['name'];
+        $_SESSION['lastname'] = $userData['lastname'];
+        $_SESSION['email'] = $userData['email'];
+        $_SESSION['rol'] = (int) $userData['_id_rol'];
+        $_SESSION['image'] = $userData['image'];
     }
 
-    //  PUBLICS METHODS
-    
-    public function create() {
+    private function permissionPage(): void
+    {
         try {
-            
-            $existEmail = $this->getBy('email', $this->getEmail() );
-            
-            if($existEmail) {
-                return 'El correo "'.$this->getEmail().'" ya está registrado.';
-            }
 
-            $imageUpload = $this->Image('users', $this->getImage() );
-            
-            if($imageUpload['valid']) {
+            $get = Database::connect()->prepare(
+                "SELECT
+                    page.name,
+                    page_section.title,
+                    page_section.control,
+                    menu.icon, 
+                    concat_ws('/',page.name,page_section.control) as url,
+                    menu.orderBy,
+                    menu.priority
+                FROM 
+                $this->table
+                INNER JOIN usr_rol
+                ON $this->table._id_rol = usr_rol._id
+                inner join page_permission 
+                on usr_rol._id = page_permission._id_rol
+                inner join page_section 
+                on page_permission._id_section = page_section._id
+                inner join page 
+                on page_section._id_page = page._id
+                left join menu 
+                on page_section._id = menu._id_section
+                WHERE 
+                $this->table._id = :id and 
+                $this->table._id_rol = :idRol and 
+                page_section.disabled = :disSection and 
+                page.disabled = :disPag 
+                order by menu.orderBy"
+            );
 
-                $userNew = $this->connect()->prepare(
-                    "INSERT 
-                    INTO $this->table 
-                    (name, 
-                    lastname, 
-                    email, 
-                    password, 
-                    _id_status, 
-                    _id_rol,
-                    image) 
-                    VALUES (:name, :lastname, :email, :password, :idStatus, :idRol, :image)"
-                );
+            $get->bindValue(':id', $_SESSION['user_init'], PDO::PARAM_INT);
+            $get->bindValue(':idRol', $_SESSION['rol'], PDO::PARAM_INT);
+            $get->bindValue(':disPag', 0, PDO::PARAM_INT);
+            $get->bindValue(':disSection', 0, PDO::PARAM_INT);
 
-                $userNew->bindValue(':name',$this->getName(), PDO::PARAM_STR);
-                $userNew->bindValue(':lastname',$this->getLastname(), PDO::PARAM_STR);
-                $userNew->bindValue(':email',$this->getEmail(), PDO::PARAM_STR);
-                $userNew->bindValue(':password',$this->_passHas(), PDO::PARAM_STR);
-                $userNew->bindValue(':idStatus',$this->getIdStatus(), PDO::PARAM_INT);
-                $userNew->bindValue(':idRol',$this->getIdRol(), PDO::PARAM_INT);
-                $userNew->bindValue(':image', $imageUpload['filename'], PDO::PARAM_STR);
+            $get->execute();
 
-                if($userNew->execute() ) {
+            $result = $get->fetchAll(PDO::FETCH_ASSOC);
+            $get = null;
+            Database::disconnect();
 
-                    header('Location: '.url_base.$_GET['controller'].'/'.$_GET['action'].'?status=1');
+            $permissionPage = [];
+            $menu = [];
 
-                }else {
+            foreach ($result as $page) {
 
-                    header('Location: '.url_base.$_GET['controller'].'/'.$_GET['action'].'?status=0');
+                if (!array_key_exists($page['name'], $permissionPage)) {
+                    $permissionPage[$page['name']] = [];
                 }
 
-            }else {
-                return $imageUpload['errors'];
+                if (array_key_exists($page['name'], $permissionPage)) {
+                    array_push($permissionPage[$page['name']], [
+                        'title' => $page['title'],
+                        'action' => $page['control']
+                    ]);
+                }
+
+                $menu[] = [
+                    'title' => $page['title'],
+                    'controller' => $page['name'],
+                    'action' => $page['control'],
+                    'icon' => $page['icon'],
+                    'url' => $page['url'],
+                    'orderBy' => $page['orderBy'],
+                    'priority' => $page['priority']
+                ];
             }
-         
+            $result = null;
 
-        }catch(PDOexception $e) {
-            
-            return $e->getMessage();
-
+            $_SESSION['permission_page'] = $permissionPage;
+            $_SESSION['menu'] = $menu;
+        } catch (PDOexception $e) {
+            Database::disconnect();
+            $this->status(500)->error($e->getMessage());
         }
     }
 
-    public function read() {
+    //  PUBLICS METHODS
+
+    public function create(): array
+    {
         try {
 
-            $get = $this->connect()->prepare(
+            $existEmail = $this->getBy('email', $this->getEmail());
+
+            if (is_null($existEmail['result'])) {
+                $this->status(404);
+                throw new Exception('El correo "' . $this->getEmail() . '" ya está registrado.');
+            }
+
+            $imageUpload = $this->Image('users', $this->getImage());
+
+            if (!$imageUpload['valid']) {
+                throw new Exception($imageUpload['errors']);
+            }
+
+            $userNew = Database::connect()->prepare(
+                "INSERT 
+                    INTO $this->table 
+                    (name, lastname, 
+                    email, password, 
+                    _id_status, _id_rol,image) 
+                    VALUES (:name, :lastname, 
+                    :email, :password, 
+                    :idStatus, :idRol, :image)"
+            );
+
+            $userNew->bindValue(':name', $this->getName(), PDO::PARAM_STR);
+            $userNew->bindValue(':lastname', $this->getLastname(), PDO::PARAM_STR);
+            $userNew->bindValue(':email', $this->getEmail(), PDO::PARAM_STR);
+            $userNew->bindValue(':password', $this->passHas(), PDO::PARAM_STR);
+            $userNew->bindValue(':idStatus', $this->getIdStatus(), PDO::PARAM_INT);
+            $userNew->bindValue(':idRol', $this->getIdRol(), PDO::PARAM_INT);
+            $userNew->bindValue(':image', $imageUpload['filename'], PDO::PARAM_STR);
+
+            if ($userNew->execute()) {
+                Utils::redirection($_GET['controller'] . '/' . $_GET['action'] . '?status=1');
+            } else {
+                Utils::redirection($_GET['controller'] . '/' . $_GET['action'] . '?status=0');
+            }
+        } catch (Exception $e) {
+            $this->fail($e->getMessage());
+        } catch (PDOexception $e) {
+            $this->status(500)->error($e->getMessage());
+        } finally {
+            return $this->send();
+        }
+    }
+
+    public function read(): array
+    {
+        try {
+
+            $get = Database::connect()->prepare(
                 "SELECT
                 $this->table._id,
                 $this->table.name,
@@ -198,43 +290,59 @@ class UserModel extends BaseModel implements Crud {
                 INNER JOIN
                 usr_rol
                 ON $this->table._id_rol = usr_rol._id
-                WHERE $this->table._id = :id");
+                WHERE $this->table._id = :id"
+            );
 
             $get->bindValue(':id', $this->getId(), PDO::PARAM_INT);
             $get->execute();
-            $result = $get->fetch(PDO::FETCH_ASSOC);
-            $get = null;
 
-            return $result;
-            
-        }catch(PDOexception $e) {
-            return $e->getMessage();
+            if (!$get->rowCount()) {
+                $this->status(404);
+                throw new Exception('Usuario no encontrado.');
+            }
+
+            $result = $get->fetch(PDO::FETCH_ASSOC);
+
+            $this->success($result);
+        } catch (Exception $e) {
+            $this->fail($e->getMessage());
+        } catch (PDOexception $e) {
+            $this->status(500)->error($e->getMessage());
+        } finally {
+            $get = null;
+            Database::disconnect();
+            return $this->send();
         }
     }
 
-    public function readAll() {
-        return $this->getAllQuery($this->queryUsers() );
+    public function readAll(): array
+    {
+        return $this->getAllQuery($this->queryUsers());
     }
 
-    public function update() {
+    public function update()
+    {
         try {
-            
-            $existEmail = $this->getBy('email', $this->getEmail() );
-            
-            if($existEmail && $existEmail['_id'] != $this->getId() ) {
-                return 'El correo "'.$this->getEmail().'" ya está registrado.';
+
+            $existEmail = $this->getBy('email', $this->getEmail());
+
+            if (is_null($existEmail['result']) && $existEmail['result']['_id'] != $this->getId()) {
+                $this->status(404);
+                throw new Exception('El correo "' . $this->getEmail() . '" ya está registrado.');
             }
 
             $user = $this->read();
-            
-            $imageUpload = $this->Image('users', ['CurrentimageName' => $user['image'], 'updateImage' => $this->getImage()], 'update');
-            
-            if($imageUpload['valid']) {
 
-                $image = !is_null($imageUpload['filename']) ? ', image = :image' : '';
-                
-                $update = $this->connect()->prepare(
-                    "UPDATE 
+            $imageUpload = $this->Image('users', ['CurrentimageName' => $user['image'], 'updateImage' => $this->getImage()], 'update');
+
+            if ($imageUpload['valid']) {
+                throw new Exception($imageUpload['errors']);
+            }
+
+            $image = !is_null($imageUpload['filename']) ? ', image = :image' : '';
+
+            $update = Database::connect()->prepare(
+                "UPDATE 
                     $this->table 
                     SET 
                     name = :name, 
@@ -244,130 +352,136 @@ class UserModel extends BaseModel implements Crud {
                     _id_status = :status
                     $image
                     WHERE _id = :id"
-                );
-                
-                $update->bindValue(':name', $this->getName(), PDO::PARAM_STR);
-                $update->bindValue(':lastname', $this->getLastname(), PDO::PARAM_STR);
-                $update->bindValue(':email', $this->getEmail(), PDO::PARAM_STR);
-                $update->bindValue(':rol', $this->getIdRol(), PDO::PARAM_INT);
-                $update->bindValue(':status', $this->getIdStatus(), PDO::PARAM_INT);
+            );
 
-                if(!is_null($imageUpload['filename']) ) {
+            $update->bindValue(':name', $this->getName(), PDO::PARAM_STR);
+            $update->bindValue(':lastname', $this->getLastname(), PDO::PARAM_STR);
+            $update->bindValue(':email', $this->getEmail(), PDO::PARAM_STR);
+            $update->bindValue(':rol', $this->getIdRol(), PDO::PARAM_INT);
+            $update->bindValue(':status', $this->getIdStatus(), PDO::PARAM_INT);
 
-                    $update->bindValue(':image', $imageUpload['filename'], PDO::PARAM_STR);
-                }
+            if (!is_null($imageUpload['filename'])) {
 
-                $update->bindValue(':id', $this->getId(), PDO::PARAM_INT);
-
-                if($update->execute() ) {
-
-                    if($_SESSION['user_init'] == $user['_id'] ) {
-                        $this->_sessionUser($this->read() );
-                    }
-                    header('Location: '.url_base.$_GET['controller'].'/'.$_GET['action'].'/'.$_GET['id'].'?status=1');
-
-                }else {
-                    header('Location: '.url_base.$_GET['controller'].'/'.$_GET['action'].'/'.$_GET['id'].'?status=0');
-                }
-
-            }else {
-                return $imageUpload['errors'];
+                $update->bindValue(':image', $imageUpload['filename'], PDO::PARAM_STR);
             }
 
-        }catch(PDOexception $e) {
-            
-            return $e->getMessage();
-
-        }
-    }
-
-    public function delete() {
-
-    }
-
-    public function updatePassword() {
-        try {
-            $update = $this->connect()->prepare(
-                "UPDATE $this->table 
-                SET password = :password
-                WHERE _id = :id");
-            
-            $update->bindValue(':password', $this->_passHas(), PDO::PARAM_STR);
             $update->bindValue(':id', $this->getId(), PDO::PARAM_INT);
 
-            if($update->execute() ) {
-                header('Location: '.url_base.$_GET['controller'].'/'.$_GET['action'].'?status=1');
-            }else {
-                header('Location: '.url_base.$_GET['controller'].'/'.$_GET['action'].'?status=0');
+            if ($update->execute()) {
+
+                if ($_SESSION['user_init'] == $user['_id']) {
+                    $this->sessionUser($this->read());
+                }
+                Utils::redirection($_GET['controller'] . '/' . $_GET['action'] . '/' . $_GET['id'] . '?status=1');
             }
-        }catch(PDOexception $e) {
-            return $e->getMessage();
+            Utils::redirection($_GET['controller'] . '/' . $_GET['action'] . '/' . $_GET['id'] . '?status=0');
+        } catch (Exception $e) {
+            $this->fail($e->getMessage());
+        } catch (PDOexception $e) {
+            $this->status(500)->error($e->getMessage());
+        } finally {
+            $update = null;
+            Database::disconnect();
+            return $this->send();
         }
     }
 
-    public function verifyPassword() {
-        try{
+    public function updatePassword()
+    {
+        try {
+            $update = Database::connect()->prepare(
+                "UPDATE $this->table 
+                SET password = :password
+                WHERE _id = :id"
+            );
+
+            $update->bindValue(':password', $this->passHas(), PDO::PARAM_STR);
+            $update->bindValue(':id', $this->getId(), PDO::PARAM_INT);
+
+            if ($update->execute()) {
+                Utils::redirection($_GET['controller'] . '/' . $_GET['action'] . '?status=1');
+            } else {
+                Utils::redirection($_GET['controller'] . '/' . $_GET['action'] . '?status=0');
+            }
+        } catch (PDOexception $e) {
+            $this->fail($e->getMessage());
+        } finally {
+            $update = null;
+            Database::disconnect();
+            return $this->send();
+        }
+    }
+
+    public function verifyPassword(): array
+    {
+        try {
 
             $userResponse = $this->read();
-        
-            if(password_verify($this->getPassword(), $userResponse['password'])) {
-                return ['valid' => true];
-            }else {
-                return ['valid' => false, 'error' => 'La contraseña actual no es correcta.'];
+
+            if (!password_verify($this->getPassword(), $userResponse['result']['password'])) {
+                throw new Exception('La contraseña actual no es correcta.');
             }
-               
-        }catch(PDOexception $e) {
-            return ['valid' => false, 'error' => $e->getMessage()];
+
+            $this->success(null);
+        } catch (Exception $e) {
+            $this->fail($e->getMessage());
+        } finally {
+            return $this->send();
         }
     }
 
-    public function login() {
-        try{
+    public function login(): array
+    {
+        try {
 
-            $userResponse = $this->getBy('email', $this->getEmail() );
-
-            if(!$userResponse) {
-                return 'La contraseña o usuario no es correcto.';
+            $userResponse = $this->getBy('email', $this->getEmail());
+            if (!$userResponse['valid']) {
+                $this->status(404);
+                throw new Exception('Usuario no encontrado.');
             }
 
-            if(!($userResponse['_id_status'] == 1) ) {
-                return 'El usuario está bloqueado, contacta con el administrador.';
+            if ($userResponse['result']['_id_status'] != 1) {
+                $this->status(401);
+                throw new Exception('El usuario está bloqueado, contacta con el administrador.');
             }
-        
-            if(password_verify($this->getPassword(), $userResponse['password'])) {
 
-                $this->_sessionUser($userResponse);
-                header('Location: '.url_base);
-
-            }else {
-                return 'La contraseña o usuario no es correcto.';
+            if (!password_verify($this->getPassword(), $userResponse['result']['password'])) {
+                $this->status(401);
+                throw new Exception('La contraseña o usuario no es correcto.');
             }
-               
-        }catch(PDOexception $e) {
-            return $e->getMessage();
+
+            $this->sessionUser($userResponse['result']);
+            $this->permissionPage();
+            Utils::redirection();
+        } catch (Exception $e) {
+            $this->fail($e->getMessage());
+        } finally {
+            return $this->send();
         }
     }
 
-    public function logout() {
+    public function logout(): void
+    {
         unset($_SESSION);
         session_destroy();
         session_regenerate_id(true);
-        header('Location: '.url_base);
+        Utils::redirection('login/index');
     }
 
     // OTHERS METHODS
 
-    public function paginations() {
-        return $this->pagination('paginations', $this->queryUsers() );
+    public function paginations(): array
+    {
+        return $this->pagination('paginations', $this->queryUsers());
     }
 
-    public function getRoles() {
+    public function getRoles(): array
+    {
         return $this->getAllOtherTable('usr_rol');
     }
 
-    public function getStatus() {
+    public function getStatus(): array
+    {
         return $this->getAllOtherTable('usr_status');
     }
 }
-
-?>

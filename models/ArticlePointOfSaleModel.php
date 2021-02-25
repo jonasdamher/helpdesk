@@ -1,5 +1,7 @@
 <?php 
 
+declare(strict_types=1);
+
 class ArticlePointOfSaleModel extends BaseModel {
 
     private int $id;
@@ -12,12 +14,9 @@ class ArticlePointOfSaleModel extends BaseModel {
     private ?string $code;
     private ?string $observations;
 
-    public function __construct($conn) {
-        parent::__construct();
-        $this->conn = $conn;
-        $this->table = 'articles_point_of_sales';
-        $this->setSchema('ArticlePointOfSaleSchema');
-    }
+    public function __construct() {
+          $this->table = 'articles_point_of_sales';
+     }
 
     // GET & SET
 
@@ -124,7 +123,7 @@ class ArticlePointOfSaleModel extends BaseModel {
     public function create() {
         try {
 
-            $new = $this->connect()->prepare(
+            $new = Database::connect()->prepare(
                 "INSERT INTO $this->table 
                 (_id_pto, serial, barcode, name, observations, _id_type, code, _id_incidence) 
                 VALUES 
@@ -139,7 +138,7 @@ class ArticlePointOfSaleModel extends BaseModel {
             $new->bindValue(':code', $this->getCode(), PDO::PARAM_STR);
             $new->bindValue(':idIncidence', $this->getIdIncidence(), PDO::PARAM_INT);
 
-            return ($new->execute() ) ? ['valid' => true, 'id' => $this->connect()->lastInsertId()] : ['valid' => false];
+            return ($new->execute() ) ? ['valid' => true, 'id' => Database::connect()->lastInsertId()] : ['valid' => false];
             
         }catch(PDOexception $e) {
             return ['valid'=> false, 'error' => $e->getMessage()];
@@ -149,7 +148,7 @@ class ArticlePointOfSaleModel extends BaseModel {
     public function read() {
         try {
 
-            $get = $this->connect()->prepare(
+            $get = Database::connect()->prepare(
                 "SELECT
                 $this->table._id,
                 $this->table.name,
@@ -182,7 +181,7 @@ class ArticlePointOfSaleModel extends BaseModel {
     public function update() {
         try {
 
-            $update = $this->connect()->prepare(
+            $update = Database::connect()->prepare(
                 "UPDATE $this->table SET
                 name = :name,
                 serial = :serial,
