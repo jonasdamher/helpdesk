@@ -1,31 +1,35 @@
-<?php 
+<?php
 
-require_once 'BaseController.php';
+declare(strict_types=1);
 
-class CompanyController extends BaseController {
+class CompanyController extends Controller
+{
 
-    public function __construct() {
-        $this->permission([1]);
-        parent::__construct(['company']);
+    public function __construct()
+    {
+        Auth::access();
+        $this->loadModels(['company']);
     }
 
-    public function index() {   
+    public function index()
+    {
 
         $companies = $this->model('company')->readAll();
         $pagination = $this->model('company')->paginations();
 
-        include $this->view('company/index');
+        include View::render('company');
     }
 
-    public function new() {
-   
+    public function new()
+    {
+
         $status = $this->model('company')->getStatus();
 
-        if($this->submitForm() ) {
+        if ($this->submitForm()) {
 
             $validator = $this->model('company')->formValidate('all');
 
-            if($validator['valid']) {
+            if ($validator['valid']) {
 
                 $schema = $validator['schema'];
 
@@ -34,30 +38,29 @@ class CompanyController extends BaseController {
                 $this->model('company')->setCif($schema['cif']);
                 $this->model('company')->setIdStatus($schema['id_status']);
 
-                $this->setResponseMessage($this->model('company')->create() );
-
-            }else {
-                $this->setResponseMessage($validator['errors']);    
+                $this->setResponseMessage($this->model('company')->create());
+            } else {
+                $this->setResponseMessage($validator['errors']);
             }
-            
         }
-        
-        include $this->view('company/new');
+
+        include View::render('company', 'new');
     }
 
-    public function update() {
+    public function update()
+    {
 
         $this->model('company')->setId($_GET['id']);
-        
+
         $company = $this->model('company')->read();
-        
+
         $status = $this->model('company')->getStatus();
 
-        if($this->submitForm() ) {
+        if ($this->submitForm()) {
 
             $validator = $this->model('company')->formValidate('all');
 
-            if($validator['valid']) {
+            if ($validator['valid']) {
 
                 $schema = $validator['schema'];
 
@@ -66,17 +69,12 @@ class CompanyController extends BaseController {
                 $this->model('company')->setCif($schema['cif']);
                 $this->model('company')->setIdStatus($schema['id_status']);
 
-                $this->setResponseMessage($this->model('company')->update() );
-
-            }else {
-                $this->setResponseMessage($validator['errors']);    
+                $this->setResponseMessage($this->model('company')->update());
+            } else {
+                $this->setResponseMessage($validator['errors']);
             }
-            
         }
 
-        include $this->view('company/update');
+        include View::render('company', 'update');
     }
-
 }
-
-?>

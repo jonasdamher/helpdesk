@@ -1,35 +1,39 @@
-<?php 
+<?php
 
-require_once 'BaseController.php';
+declare(strict_types=1);
 
-class IncidenceController extends BaseController {
+class IncidenceController extends Controller
+{
 
-    public function __construct() {
-        $this->permission([1, 2]);
-        parent::__construct(['incidence', 'Article', 'ArticlePointOfSale', 'ArticleBorrowed']);
+    public function __construct()
+    {
+        Auth::access();
+        $this->loadModels(['incidence', 'Article', 'ArticlePointOfSale', 'ArticleBorrowed']);
     }
 
-    public function index() {   
+    public function index()
+    {
 
         $incidences = $this->model('incidence')->readAll();
         $pagination = $this->model('incidence')->paginations();
 
-        include $this->view('incidence/index');
+        include View::render('incidence');
     }
-    
-    public function new() {
-   
+
+    public function new()
+    {
+
         $pointsOfSales = $this->model('incidence')->getPointOfSales();
         $users = $this->model('incidence')->getUsers();
         $priorities = $this->model('incidence')->getPriorities();
         $status = $this->model('incidence')->getStatus();
         $types = $this->model('incidence')->getType();
-        
-        if($this->submitForm() ) {
+
+        if ($this->submitForm()) {
 
             $validator = $this->model('incidence')->formValidate('all');
 
-            if($validator['valid']) {
+            if ($validator['valid']) {
 
                 $schema = $validator['schema'];
 
@@ -42,16 +46,16 @@ class IncidenceController extends BaseController {
                 $this->model('incidence')->setIdType($schema['id_type']);
 
                 $this->setResponseMessage($this->model('incidence')->create());
-
-            }else {
-                $this->setResponseMessage($validator['errors']);    
+            } else {
+                $this->setResponseMessage($validator['errors']);
             }
         }
-        
-        include $this->view('incidence/new');
+
+        include View::render('incidence', 'new');
     }
 
-    public function update() {
+    public function update()
+    {
 
         $this->model('incidence')->setId($_GET['id']);
 
@@ -62,12 +66,12 @@ class IncidenceController extends BaseController {
         $priorities = $this->model('incidence')->getPriorities();
         $status = $this->model('incidence')->getStatus();
         $types = $this->model('incidence')->getType();
-        
-        if($this->submitForm() ) {
+
+        if ($this->submitForm()) {
 
             $validator = $this->model('incidence')->formValidate('all');
 
-            if($validator['valid']) {
+            if ($validator['valid']) {
 
                 $schema = $validator['schema'];
 
@@ -80,61 +84,64 @@ class IncidenceController extends BaseController {
                 $this->model('incidence')->setIdType($schema['id_type']);
 
                 $this->setResponseMessage($this->model('incidence')->update());
-
-            }else {
-                $this->setResponseMessage($validator['errors']);    
+            } else {
+                $this->setResponseMessage($validator['errors']);
             }
         }
-        
-        include $this->view('incidence/update');
+
+        include View::render('incidence', 'update');
     }
 
-    public function assigned() {   
+    public function assigned()
+    {
 
         $this->model('incidence')->setIdAttended($_SESSION['user_init']);
         $this->index();
     }
 
-    public function details() {
+    public function details()
+    {
 
         $this->model('incidence')->setId($_GET['id']);
         $incidence = $this->model('incidence')->getDetails();
 
         // ARTICLES POINT OF SALE
         $this->model('ArticlePointOfSale')->setIdIncidence($_GET['id']);
-        
+
         $articles = $this->model('ArticlePointOfSale')->articlesIncidence();
         $countArticles = count($articles);
 
         // ARTICLES BORROWED
         $this->model('ArticleBorrowed')->setIdIncidence($_GET['id']);
-        
+
         $articlesBorrowed = $this->model('ArticleBorrowed')->articlesIncidence();
         $countArticlesBorrowed = count($articlesBorrowed);
-        include $this->view('incidence/details');
+        include View::render('incidence', 'details');
     }
 
-    public function collected() {
+    public function collected()
+    {
 
         // INCINDENCE
         $this->model('incidence')->setId($_GET['id']);
         $incidence = $this->model('incidence')->getDetails();
-        
+
         // ARTICLE ONLY POINT OF SALE
         $this->model('ArticlePointOfSale')->setIdIncidence($_GET['id']);
         $articlePointOfSale = $this->model('ArticlePointOfSale')->readAll();
         $pagination = $this->model('ArticlePointOfSale')->paginations();
         $typesArticle = $this->model('ArticlePointOfSale')->getTypes();
-       
-        include $this->view('incidence/collected');
+
+        include View::render('incidence', 'collected');
     }
 
-    public function borrowed() {
+    public function borrowed()
+    {
 
         // INCINDENCE
         $this->model('incidence')->setId($_GET['id']);
         $incidence = $this->model('incidence')->getDetails();
-        
+
         // ARTICLE BORROWED POINT OF SALE
         $this->model('ArticleBorrowed')->setIdIncidence($_GET['id']);
         $articlesBorrowed = $this->model('ArticleBorrowed')->readAll();
@@ -142,8 +149,6 @@ class IncidenceController extends BaseController {
         $articles = $this->model('Article')->getNotBorrowed();
         $borroweStatus = $this->model('ArticleBorrowed')->getborrowedStatus();
 
-        include $this->view('incidence/borrowed');
+        include View::render('incidence', 'borrowed');
     }
 }
-
-?>

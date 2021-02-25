@@ -1,6 +1,9 @@
 <?php
 
-class ContactPointOfSaleModel extends BaseModel {
+declare(strict_types=1);
+
+class ContactPointOfSaleModel extends BaseModel
+{
 
     private int $id;
     private string $name;
@@ -8,79 +11,89 @@ class ContactPointOfSaleModel extends BaseModel {
     private ?string $email;
     private int $idPto;
 
-    public function __construct($conn) {
-        parent::__construct();
-        $this->conn = $conn;
+    public function __construct()
+    {
         $this->table = 'pto_contacts';
-        $this->setSchema('ContactPointOfSaleSchema');
     }
 
     // GET & SET
 
-    public function getId() {
+    public function getId()
+    {
         return $this->id;
     }
 
-    public function setId(int $id) {
+    public function setId(int $id)
+    {
         $this->id = $id;
     }
 
-    public function getName() {
+    public function getName()
+    {
         return $this->name;
     }
 
-    public function setName(string $name) {
+    public function setName(string $name)
+    {
         $this->name = $name;
     }
 
-    public function getPhone() {
+    public function getPhone()
+    {
         return $this->phone;
     }
 
-    public function setPhone(?int $phone) {
+    public function setPhone(?int $phone)
+    {
         $this->phone = $phone;
     }
 
-    public function getEmail() {
+    public function getEmail()
+    {
         return $this->email;
     }
 
-    public function setEmail(?string $email) {
-        $this->email = $email;   
+    public function setEmail(?string $email)
+    {
+        $this->email = $email;
     }
- 
-    public function getIdPto() {
+
+    public function getIdPto()
+    {
         return $this->idPto;
     }
 
-    public function setIdPto(int $idPto) {
+    public function setIdPto(int $idPto)
+    {
         $this->idPto = $idPto;
     }
-    
+
     /**
      *  METHODS
      *  PRIVATES METHODS
-    */ 
+     */
 
-    private function queryContact() {
- 
+    private function queryContact()
+    {
+
         require_once 'libs/QueryBuild.php';
         $build = new QueryBuild();
 
         $build->setSelect('_id, name, phone, email');
         $build->setFrom('pto_contacts');
         $build->setWhere('_id_pto = :id');
-        $build->setById($this->getIdPto() );
+        $build->setById($this->getIdPto());
 
         return $build->query();
     }
 
     //  PUBLICS METHODS
 
-    public function create() {
+    public function create()
+    {
         try {
 
-            $new = $this->connect()->prepare(
+            $new = Database::connect()->prepare(
                 "INSERT 
                 INTO $this->table 
                     (name, 
@@ -99,52 +112,54 @@ class ContactPointOfSaleModel extends BaseModel {
             $new->bindValue(':email', $this->getEmail(), PDO::PARAM_STR);
             $new->bindValue(':idPto', $this->getIdPto(), PDO::PARAM_INT);
 
-            return ($new->execute() ) ? ['valid' => true, 'id' => $this->connect()->lastInsertId()] : ['valid' => false];
-
-        }catch(PDOexception $e) {
-            return ['valid'=> false, 'error' => $e->getMessage()];
+            return ($new->execute()) ? ['valid' => true, 'id' => Database::connect()->lastInsertId()] : ['valid' => false];
+        } catch (PDOexception $e) {
+            return ['valid' => false, 'error' => $e->getMessage()];
         }
     }
 
-    public function read(){
-        return $this->getById($this->getId() );
+    public function read()
+    {
+        return $this->getById($this->getId());
     }
 
-    public function readAll() {
-        return $this->getAllQuery($this->queryContact() );
+    public function readAll()
+    {
+        return $this->getAllQuery($this->queryContact());
     }
 
-    public function update() {
+    public function update()
+    {
         try {
 
-            $update = $this->connect()->prepare(
+            $update = Database::connect()->prepare(
                 "UPDATE $this->table SET
                 name = :name, 
                 phone = :phone, 
                 email = :email
-                WHERE _id = :id");
+                WHERE _id = :id"
+            );
 
             $update->bindValue(':name', $this->getName(), PDO::PARAM_STR);
             $update->bindValue(':phone', $this->getPhone(), PDO::PARAM_INT);
             $update->bindValue(':email', $this->getEmail(), PDO::PARAM_STR);
             $update->bindValue(':id', $this->getId(), PDO::PARAM_INT);
 
-            return ($update->execute() ) ? ['valid' => true] : ['valid' => false];
-
-        }catch(PDOexception $e) {
-            return ['valid'=> false, 'error' => $e->getMessage()];
+            return ($update->execute()) ? ['valid' => true] : ['valid' => false];
+        } catch (PDOexception $e) {
+            return ['valid' => false, 'error' => $e->getMessage()];
         }
     }
 
-    public function delete() {
-        return ($this->deleteById($this->getId() ) ) ? ['valid' => true] : ['valid' => false];
+    public function delete()
+    {
+        return ($this->deleteById($this->getId())) ? ['valid' => true] : ['valid' => false];
     }
 
     // OTHERS METHODS
-  
-    public function paginations() {
-        return $this->pagination('paginations', $this->queryContact() );
+
+    public function paginations()
+    {
+        return $this->pagination('paginations', $this->queryContact());
     }
 }
-
-?>

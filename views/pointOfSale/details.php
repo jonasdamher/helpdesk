@@ -1,19 +1,16 @@
-<?php include 'views/partials/head.php'; ?>
-<?php include 'views/partials/nav.php'; ?>
-<main>
   <div class="container container-dashboard f-column">
-    
+
     <section class="dashboard-header dashboard-tab bg-blue d-flex f-column">
-      <?php 
+      <?php
       $url = 'controller';
       $nameSection = 'Ficha de punto de venta';
-      include 'views/partials/header-action.php'; 
+      include 'views/includes/header-action.php';
       ?>
-      <?php include 'views/partials/tab.php'; ?>
+      <?php include 'views/includes/tab.php'; ?>
     </section>
 
     <section class="bg-white dashboard-content shadow-sm">
-     
+
       <div class="d-flex j-evenly f-wrap j-content-start-sm">
         <div class="pd-b-1">
           <p class="p text-bold">Punto de venta</p>
@@ -48,57 +45,57 @@
           <table class="table">
             <thead>
               <tr>
-                <?php 
+                <?php
                 $thead = [
                   ['name' => 'Nombre'],
                   ['name' => 'Teléfono'],
                   ['name' => 'Email']
                 ];
-                include 'views/partials/thead-order.php'; ?>
+                include 'views/includes/thead-order.php'; ?>
               </tr>
             </thead>
             <tbody>
-            <?php foreach ($contacts as $contact) { ?>
-              <tr data-id="<?= $contact['_id'] ?>">
-                <td><?= $contact['name'] ?></td>
-                <td><?= is_null($contact['phone']) ? 'Ninguno' : $contact['phone'] ?></td>
-                <td><?= $contact['email'] ?></td>
-                <td>
-                <?php 
-                $linkTable = [
-                  'title' =>  'contacto '.$contact['name'],
-                  'links' => [
-                    [
-                      'name' => 'Editar',
-                      'type' =>  'update', 
-                      'icon' => 'pen'
-                    ],[
-                      'name' => 'Eliminar',
-                      'type' =>  'delete', 
-                      'icon' => 'trash'
-                    ]
-                  ]
-                ];
-                include 'views/partials/dropdown-table-modal.php';
-                ?>
-                </td>
-              </tr>
-            <?php } ?>
+              <?php foreach ($contacts as $contact) { ?>
+                <tr data-id="<?= $contact['_id'] ?>">
+                  <td><?= $contact['name'] ?></td>
+                  <td><?= is_null($contact['phone']) ? 'Ninguno' : $contact['phone'] ?></td>
+                  <td><?= $contact['email'] ?></td>
+                  <td>
+                    <?php
+                    $linkTable = [
+                      'title' =>  'contacto ' . $contact['name'],
+                      'links' => [
+                        [
+                          'name' => 'Editar',
+                          'type' =>  'update',
+                          'icon' => 'pen'
+                        ], [
+                          'name' => 'Eliminar',
+                          'type' =>  'delete',
+                          'icon' => 'trash'
+                        ]
+                      ]
+                    ];
+                    include 'views/includes/dropdown-table-modal.php';
+                    ?>
+                  </td>
+                </tr>
+              <?php } ?>
             </tbody>
             <tfoot>
               <tr>
                 <td colspan="4">
                   <div class="d-flex j-content-end">
-                    <?php include 'views/partials/pagination.php'; ?>
+                    <?php include 'views/includes/pagination.php'; ?>
                   </div>
                 </td>
               </tr>
             </tfoot>
           </table>
-        </div>  
+        </div>
       </div>
     </section>
-    <?php include 'views/partials/snackbar-modal.php'; ?>
+    <?php include 'views/includes/snackbar-modal.php'; ?>
   </div>
   <!-- MODAL -->
   <!-- MODAL NEW CONTACT -->
@@ -113,22 +110,22 @@
           <form class="form contact-new" autocomplete="off">
             <div class="form-box-input">
               <label class="label" for="name">Nombre de contacto</label>
-              <input class="ipt ipt-default" id="name" name="name" type="text"/>
+              <input class="ipt ipt-default" id="name" name="name" type="text" />
             </div>
             <div class="form-box-input">
               <label class="label" for="phone">Teléfono</label>
-              <input class="ipt ipt-default" id="phone" name="phone" type="tel"/>
+              <input class="ipt ipt-default" id="phone" name="phone" type="tel" />
             </div>
             <div class="form-box-input">
               <label class="label" for="email">Email</label>
-              <input class="ipt ipt-default" id="email" name="email" type="email"/>
+              <input class="ipt ipt-default" id="email" name="email" type="email" />
             </div>
-            <input class="ipt ipt-default" id="id" name="id" type="hidden" value="<?= $_GET['id'] ?>"/>
+            <input class="ipt ipt-default" id="id" name="id" type="hidden" value="<?= $_GET['id'] ?>" />
             <button class="btn btn-dark shadow-lg border-rd" type="submit"><span><i class="fas fa-plus"></i></span>Registrar</button>
           </form>
           <div class="text-error text-bold text-red d-flex  f-column f-items-center"></div>
         </div>
-      </div>  
+      </div>
     </div>
   </div>
   <!-- MODAL UPDATE CONTACT -->
@@ -143,22 +140,22 @@
           <form class="form contact-update" data-url="controller=contactPointOfSale&action=read">
             <div class="form-box-input">
               <label class="label" for="name_update">Nombre de contacto</label>
-              <input class="ipt ipt-default" id="name_update" name="name" type="text" autocomplete="off"/>
+              <input class="ipt ipt-default" id="name_update" name="name" type="text" autocomplete="off" />
             </div>
             <div class="form-box-input">
               <label class="label" for="phone_update">Teléfono</label>
-              <input class="ipt ipt-default" id="phone_update" name="phone" type="text" autocomplete="off"/>
+              <input class="ipt ipt-default" id="phone_update" name="phone" type="text" autocomplete="off" />
             </div>
             <div class="form-box-input">
               <label class="label" for="email_update">Email</label>
-              <input class="ipt ipt-default" id="email_update" name="email" type="text" autocomplete="off"/>
+              <input class="ipt ipt-default" id="email_update" name="email" type="text" autocomplete="off" />
             </div>
-            <input class="ipt ipt-default" id="id_update" name="id" type="hidden" autocomplete="off"/>
+            <input class="ipt ipt-default" id="id_update" name="id" type="hidden" autocomplete="off" />
             <button class="btn btn-dark shadow-lg border-rd" type="submit"><span><i class="fas fa-save"></i></span>Guardar</button>
           </form>
           <div class="text-error-update text-bold text-red d-flex  f-column f-items-center"></div>
         </div>
-      </div>  
+      </div>
     </div>
   </div>
   <!-- MODAL DELETE CONTACT -->
@@ -174,9 +171,7 @@
           <button data-id="" class="btn btn-delete btn-contact-delete border-rd btn-red shadow-lg" type="button">Si, quiero eliminar el contacto</button>
           <div class="text-error-delete text-bold text-red d-flex f-column f-items-center"></div>
         </div>
-      </div>  
+      </div>
     </div>
   </div>
   <!-- FIN MODAL -->
-</main>
-<?php include 'views/partials/footer.php'; ?>

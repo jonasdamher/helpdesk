@@ -1,50 +1,55 @@
 <?php
 
-require_once 'BaseController.php';
+declare(strict_types=1);
 
-class PointOfSaleController extends BaseController {
+class PointOfSaleController extends Controller
+{
 
-    public function __construct() {
-        $this->permission([1, 2]);
-        parent::__construct(['pointOfSale', 'contactPointOfSale']);
+    public function __construct()
+    {
+        Auth::access();
+        $this->loadModels(['pointOfSale', 'contactPointOfSale']);
     }
 
-    public function index() {   
+    public function index()
+    {
 
         $pointsOfSales = $this->model('pointOfSale')->readAll();
         $pagination = $this->model('pointOfSale')->paginations();
 
-        include $this->view('pointOfSale/index');
+        include View::render('pointOfSale');
     }
 
-    public function details() {
+    public function details()
+    {
 
         // POINT OF SALE
         $this->model('pointOfSale')->setId($_GET['id']);
         $pointOfSale = $this->model('pointOfSale')->getDetails();
-        
+
         // CONTACTS POINT OF SALE
         $this->model('contactPointOfSale')->setIdPto($_GET['id']);
         $contacts = $this->model('contactPointOfSale')->readAll();
         $pagination = $this->model('contactPointOfSale')->paginations();
 
-        include $this->view('pointOfSale/details');
+        include View::render('pointOfSale', 'details');
     }
 
-    public function new() {
+    public function new()
+    {
 
         $companies = $this->model('pointOfSale')->getCompanies();
         $status = $this->model('pointOfSale')->getStatus();
         $countries = $this->model('pointOfSale')->getCountries();
 
-        if($this->submitForm() ) {
+        if ($this->submitForm()) {
 
             $validator = $this->model('pointOfSale')->formValidate('all');
 
-            if($validator['valid']) {
+            if ($validator['valid']) {
 
                 $schema = $validator['schema'];
-                
+
                 $this->model('pointOfSale')->setIdCompany($schema['id_company']);
                 $this->model('pointOfSale')->setIdStatus($schema['id_status']);
                 $this->model('pointOfSale')->setName($schema['name']);
@@ -55,18 +60,17 @@ class PointOfSaleController extends BaseController {
                 $this->model('pointOfSale')->setPostalCode($schema['postal_code']);
                 $this->model('pointOfSale')->setAddress($schema['address']);
 
-                $this->setResponseMessage($this->model('pointOfSale')->create() );
-
-            }else {
-                $this->setResponseMessage($validator['errors']);    
+                $this->setResponseMessage($this->model('pointOfSale')->create());
+            } else {
+                $this->setResponseMessage($validator['errors']);
             }
-            
         }
-        
-        include $this->view('pointOfSale/new');
+
+        include View::render('pointOfSale', 'new');
     }
 
-    public function update() {
+    public function update()
+    {
 
         $this->model('pointOfSale')->setId($_GET['id']);
 
@@ -77,11 +81,11 @@ class PointOfSaleController extends BaseController {
         $countries = $this->model('pointOfSale')->getCountries();
         $country = Utils::nameDatalist($countries, $pointOfSale['_id_country'], 'name');
 
-        if($this->submitForm() ) {
+        if ($this->submitForm()) {
 
             $validator = $this->model('pointOfSale')->formValidate('all');
 
-            if($validator['valid']) {
+            if ($validator['valid']) {
 
                 $schema = $validator['schema'];
 
@@ -95,17 +99,12 @@ class PointOfSaleController extends BaseController {
                 $this->model('pointOfSale')->setPostalCode($schema['postal_code']);
                 $this->model('pointOfSale')->setAddress($schema['address']);
 
-                $this->setResponseMessage($this->model('pointOfSale')->update() );
-
-            }else {
-                $this->setResponseMessage($validator['errors']);    
+                $this->setResponseMessage($this->model('pointOfSale')->update());
+            } else {
+                $this->setResponseMessage($validator['errors']);
             }
-            
         }
-        
-        include $this->view('pointOfSale/update');
+
+        include View::render('pointOfSale', 'update');
     }
-
 }
-
-?>

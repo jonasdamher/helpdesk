@@ -1,12 +1,10 @@
-<?php include 'views/partials/head.php'; ?>
-<?php include 'views/partials/nav.php'; ?>
-<main>
+ 
   <div class="container container-dashboard f-column">
     <section class="dashboard-header bg-blue">
       <?php 
       $url = 'details';
       $nameSection = 'Artículos en prestamo';
-      include 'views/partials/header-action.php'; 
+      include 'views/includes/header-action.php'; 
       ?>
     </section>
     <section class="bg-white dashboard-content shadow-sm">
@@ -27,7 +25,7 @@
                   ['name' => 'Código de barras'],
                   ['name' => 'Código']
                 ];
-                include 'views/partials/thead-order.php'; ?>
+                include 'views/includes/thead-order.php'; ?>
               </tr>
             </thead>
             <tbody>
@@ -56,7 +54,7 @@
                     ]
                   ]
                 ];
-                include 'views/partials/dropdown-table-modal.php';
+                include 'views/includes/dropdown-table-modal.php';
                 ?>
                 </td>
               </tr>
@@ -66,7 +64,7 @@
               <tr>
                 <td colspan="5">
                   <div class="d-flex j-content-end">
-                    <?php include 'views/partials/pagination.php'; ?>
+                    <?php include 'views/includes/pagination.php'; ?>
                   </div>
                 </td>
               </tr>
@@ -75,7 +73,7 @@
         </div>
       </div>
     </section>
-    <?php include 'views/partials/snackbar-modal.php'; ?>
+    <?php include 'views/includes/snackbar-modal.php'; ?>
   </div>
 
 <!-- MODAL ARTICLE BORROWED -->
@@ -165,6 +163,4 @@
     </div>  
   </div>
 </div>
-
-</main>
-<?php include 'views/partials/footer.php'; ?>
+ 
