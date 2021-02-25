@@ -1,24 +1,23 @@
+# No mostrar listado de carpetas.
 IndexIgnore *
 Options +FollowSymLinks
 Options -Indexes
 
+# No mostrar versión actual de Apache.
 ServerSignature Off
 
-<Files .htaccess>
-  Order allow,deny
-  Deny from all
-</Files>
-
-<Files ~ "\.(env|md|gitignore|gitattributes|lock)$">
+# Denegar el acceso a cualquier archivo con dichas extensiones.
+<Files ~ "\.(env|md|htaccess|gitignore|gitattributes|lock)$">
     Order allow,deny
     Deny from all
 </Files>
 
+# Rutas de la página web.
 <IfModule mod_rewrite.c>
 
   RewriteEngine On
 
-  #SECURITY
+  # Seguridad
   RewriteCond %{QUERY_STRING} (;|<|>|’|”|\)|%0A|%0D|%22|%27|%3C|%3E|%00).*(/\*|union|select|insert|cast|set|declare|drop|update|md5|benchmark) [NC,OR]
   RewriteCond %{QUERY_STRING} \.\./\.\. [OR]
   RewriteCond %{QUERY_STRING} (localhost|loopback|127\.0\.0\.1) [NC,OR]
@@ -42,39 +41,42 @@ ServerSignature Off
   RewriteRule .* - [F]
   RewriteRule ^(cache|includes|logs|tmp)/ - [F]
 
-  #HTTPS
+  # Redireccionar de HTTP a HTTPS.
   RewriteCond %{SERVER_PORT} 80
   RewriteRule ^(.*)$ https:/www.helpdesk.dev/$1 [R,L]
 
-  #ROUTES
-  RewriteRule ^([0-9a-zA-Z-_]+)/([0-9a-zA-Z-_]+)$ index.php?controller=$1&action=$2 [QSA]
-  RewriteRule ^([0-9a-zA-Z-_]+)$ index.php?controller=$1 [QSA]
-  RewriteRule ^([0-9a-zA-Z-_]+)/([0-9a-zA-Z-_]+)/([0-9]+)$ index.php?controller=$1&action=$2&id=$3 [QSA]
+  # Urls amigables API.
+  RewriteRule ^api/([a-zA-Z0-9]+)/([a-z-0-9]+)/([a-zA-Z0-9-]+)/([a-zA-Z0-9-]+)$ index.php?api=api&version=$1&controller=$2&action=$3&id=$4 [L]
+  RewriteRule ^api/([a-zA-Z0-9]+)/([a-z-0-9]+)/([a-zA-Z0-9-]+)$ index.php?api=api&version=$1&controller=$2&action=$3 [L]
+
+  # Urls amigables.
+  RewriteRule ^([a-zA-Z0-9]+)/([a-zA-Z0-9-]+)/([a-zA-Z0-9-]+)$ index.php?controller=$1&action=$2&id=$3 [L]
+  RewriteRule ^([a-zA-Z0-9]+)/([a-zA-Z0-9-]+)$ index.php?controller=$1&action=$2 [L,QSA]
+  RewriteRule ^([a-zA-Z0-9]+)$ index.php?controller=$1 [L,QSA]
 
 </IfModule>
 
-#CACHE
+# Caché.
 <IfModule mod_expires.c>
   
   ExpiresActive On
 
-  ExpiresByType font/ttf A432000
-  ExpiresByType font/woff A432000
-  ExpiresByType font/eot A432000
-  ExpiresByType font/woff2 A432000
-  ExpiresByType image/svg+xml A432000
-  ExpiresByType image/webp A432000
-  ExpiresByType image/png A432000
-  ExpiresByType text/css A432000
-  ExpiresByType text/javascript A432000
-  ExpiresByType application/javascript A432000
-  ExpiresByType application/x-javascript A432000
+  # Guardar archivos en caché durante 1 año.
+  ExpiresByType font/ttf A31536000 
+  ExpiresByType font/woff A31536000 
+  ExpiresByType font/eot A31536000 
+  ExpiresByType font/woff2 A31536000 
+  ExpiresByType image/svg+xml A31536000 
+  ExpiresByType image/webp A31536000 
+  ExpiresByType image/png A31536000 
+  ExpiresByType text/css A31536000 
+  ExpiresByType text/javascript A31536000 
+  ExpiresByType application/javascript A31536000 
+  ExpiresByType application/x-javascript A31536000 
 
 </IfModule>
 
-#COMPRESSION
+# Compresión de archivos.
 <IfModule mod_brotli.c>
-  
   SetOutputFilter BROTLI_COMPRESS
-
 </IfModule>

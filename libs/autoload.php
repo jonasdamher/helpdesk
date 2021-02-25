@@ -1,9 +1,12 @@
-<?php 
+<?php
 
-function autoload($class) {
-    require_once('controllers/'.$class.'.php');
+declare(strict_types=1);
+
+define('PATH_CLASS', $path);
+
+function autoloadClass($className)
+{
+    require_once(PATH_CLASS . $className . '.php');
 }
 
-spl_autoload_register('autoload');
-
-?>
+spl_autoload_register('autoloadClass');

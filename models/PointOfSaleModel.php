@@ -1,6 +1,9 @@
 <?php
 
-class PointOfSaleModel extends BaseModel implements Crud {
+declare(strict_types=1);
+
+class PointOfSaleModel extends BaseModel
+{
 
     private int $id;
     private int $idCompany;
@@ -13,101 +16,120 @@ class PointOfSaleModel extends BaseModel implements Crud {
     private ?int $postalCode;
     private ?string $address;
 
-    public function __construct($conn) {
-        parent::__construct();
-        $this->conn = $conn;
-        $this->table = 'points_of_sales';
-        $this->setSchema('PointOfSaleSchema');
-    }
+    public function __construct()
+    {
+          $this->table = 'points_of_sales';
+     }
 
     // GET & SET
 
-    public function getId() {
+    public function getId()
+    {
         return $this->id;
     }
 
-    public function setId(int $id) {
+    public function setId(int $id)
+    {
         $this->id = $id;
     }
 
-    public function getIdCompany() {
+    public function getIdCompany()
+    {
         return $this->idCompany;
     }
 
-    public function setIdCompany(string $idCompany) {
+    public function setIdCompany(string $idCompany)
+    {
         $this->idCompany = $idCompany;
     }
 
-    public function getIdStatus() {
+    public function getIdStatus()
+    {
         return $this->idStatus;
     }
 
-    public function setIdStatus(string $status) {
+    public function setIdStatus(string $status)
+    {
         $this->idStatus = $status;
     }
 
-    public function getName() {
+    public function getName()
+    {
         return $this->name;
     }
 
-    public function setName(string $name) {
+    public function setName(string $name)
+    {
         $this->name = $name;
     }
-    
-    public function getCompanyCode() {
+
+    public function getCompanyCode()
+    {
         return $this->companyCode;
     }
 
-    public function setCompanyCode(?string $companyCode) {
+    public function setCompanyCode(?string $companyCode)
+    {
         $this->companyCode = $companyCode;
     }
 
-    public function getIdCountry() {
+    public function getIdCountry()
+    {
         return $this->idCountry;
     }
 
-    public function setIdCountry(?int $idCountry) {
+    public function setIdCountry(?int $idCountry)
+    {
         $this->idCountry = $idCountry;
     }
-        
-    public function getProvince() {
+
+    public function getProvince()
+    {
         return $this->province;
     }
 
-    public function setProvince(?string $province) {
+    public function setProvince(?string $province)
+    {
         $this->province = $province;
     }
 
-    public function getLocality() {
+    public function getLocality()
+    {
         return $this->locality;
     }
 
-    public function setLocality(?string $locality) {
+    public function setLocality(?string $locality)
+    {
         $this->locality = $locality;
     }
 
-    public function getPostalCode() {
+    public function getPostalCode()
+    {
         return $this->postalCode;
     }
 
-    public function setPostalCode(?int $postalCode) {
+    public function setPostalCode(?int $postalCode)
+    {
         $this->postalCode = $postalCode;
     }
 
-    public function getAddress() {
+    public function getAddress()
+    {
         return $this->address;
-    }   
+    }
 
-    public function setAddress(?string $address) {
+    public function setAddress(?string $address)
+    {
         $this->address = $address;
     }
 
     /**
      *  METHODS
      *  PRIVATES METHODS
-    */ 
+     */
 
-    private function queryPointOfSale() {
+    private function queryPointOfSale()
+    {
 
         require_once 'libs/QueryBuild.php';
         $build = new QueryBuild();
@@ -118,7 +140,7 @@ class PointOfSaleModel extends BaseModel implements Crud {
         $this->table.company_code, 
         $this->table._id_status, 
         $this->table._id_company, pto_status.status, companies.business_name, companies.cif");
-       
+
         $build->setFrom($this->table);
 
         $build->setInner("INNER JOIN companies ON $this->table._id_company = companies._id
@@ -129,15 +151,16 @@ class PointOfSaleModel extends BaseModel implements Crud {
         companies.cif LIKE :search OR
         companies.business_name LIKE :search OR
         companies.tradename LIKE :search");
-            
+
         return $build->query();
     }
 
     //  PUBLICS METHODS
 
-    public function create() {
+    public function create()
+    {
         try {
-            
+
             $new = $this->connect()->prepare(
                 "INSERT 
                 INTO $this->table 
@@ -171,26 +194,28 @@ class PointOfSaleModel extends BaseModel implements Crud {
             $new->bindValue(':postalCode', $this->getPostalCode(), PDO::PARAM_INT);
             $new->bindValue(':address', $this->getAddress(), PDO::PARAM_STR);
 
-            if($new->execute() ) {
+            if ($new->execute()) {
                 return 'Punto de venta registrado.';
-            }else {
+            } else {
                 return 'Hubo un error al registrar, intentalo mas tarde.';
             }
-
-        }catch(PDOexception $e) {
+        } catch (PDOexception $e) {
             return $e->getMessage();
         }
     }
 
-    public function read() {
-        return $this->getById($this->getId() );
+    public function read()
+    {
+        return $this->getById($this->getId());
     }
 
-    public function readAll() {
-        return $this->getAllQuery($this->queryPointOfSale() );
+    public function readAll()
+    {
+        return $this->getAllQuery($this->queryPointOfSale());
     }
 
-    public function update() {
+    public function update()
+    {
         try {
 
             $update = $this->connect()->prepare(
@@ -220,25 +245,26 @@ class PointOfSaleModel extends BaseModel implements Crud {
             $update->bindValue(':locality', $this->getLocality(), PDO::PARAM_STR);
             $update->bindValue(':postal_code', $this->getPostalCode(), PDO::PARAM_INT);
             $update->bindValue(':address', $this->getAddress(), PDO::PARAM_STR);
-            
+
             $update->bindValue(':id', $this->getId(), PDO::PARAM_INT);
 
-            if($update->execute() ) {
-                header('Location: '.url_base.$_GET['controller'].'/'.$_GET['action'].'/'.$_GET['id'].'?status=1');
-            }else {
-                header('Location: '.url_base.$_GET['controller'].'/'.$_GET['action'].'/'.$_GET['id'].'?status=0');
+            if ($update->execute()) {
+                header('Location: ' . URL_BASE . $_GET['controller'] . '/' . $_GET['action'] . '/' . $_GET['id'] . '?status=1');
+            } else {
+                header('Location: ' . URL_BASE . $_GET['controller'] . '/' . $_GET['action'] . '/' . $_GET['id'] . '?status=0');
             }
-        }catch(PDOexception $e) {
+        } catch (PDOexception $e) {
             return $e->getMessage();
         }
     }
 
-    public function delete() {
-
+    public function delete()
+    {
     }
 
-    public function getDetails() {
-        try{
+    public function getDetails()
+    {
+        try {
 
             $get = $this->connect()->prepare(
                 "SELECT 
@@ -266,29 +292,31 @@ class PointOfSaleModel extends BaseModel implements Crud {
                 countries
                 ON $this->table._id_country = countries._id
                 WHERE $this->table._id = :id
-            ");
+            "
+            );
 
             $get->bindValue(':id', $this->getId(), PDO::PARAM_INT);
             $get->execute();
             $result = $get->fetch(PDO::FETCH_ASSOC);
-            
+
             $get = null;
 
             return $result;
-
-        }catch(PDOexception $e) {
+        } catch (PDOexception $e) {
             return $e->getMessage();
         }
     }
 
     // OTHERS METHODS
 
-    public function paginations() {
-        return $this->pagination('paginations', $this->queryPointOfSale() );
+    public function paginations()
+    {
+        return $this->pagination('paginations', $this->queryPointOfSale());
     }
-   
-    public function getCompanies() {
-        try{
+
+    public function getCompanies()
+    {
+        try {
 
             $get = $this->connect()->prepare(
                 "SELECT _id, business_name
@@ -299,25 +327,24 @@ class PointOfSaleModel extends BaseModel implements Crud {
             $get->bindValue(':status', 1, PDO::PARAM_INT);
 
             $get->execute();
-           
+
             $result = $get->fetchAll(PDO::FETCH_ASSOC);
-            
+
             $get = null;
 
             return $result;
-
-        }catch(PDOexception $e) {
+        } catch (PDOexception $e) {
             return $e->getMessage();
         }
     }
 
-    public function getStatus() {
+    public function getStatus()
+    {
         return $this->getAllOtherTable('pto_status');
     }
 
-    public function getCountries() {
+    public function getCountries()
+    {
         return $this->getAllOtherTable('countries');
     }
 }
-
-?>

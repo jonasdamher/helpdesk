@@ -1,7 +1,8 @@
 <?php 
 
+declare(strict_types=1);
 
-class SupplierModel extends BaseModel implements Crud {
+class SupplierModel extends BaseModel {
 
     private int $id;
     private string $tradename;
@@ -15,12 +16,9 @@ class SupplierModel extends BaseModel implements Crud {
     private ?int $phone;
     private ?string $email;
 
-    public function __construct($conn) {
-        parent::__construct();
-        $this->conn = $conn;
-        $this->table = 'suppliers';
-        $this->setSchema('SupplierSchema');
-    }
+    public function __construct() {
+         $this->table = 'suppliers';
+     }
     
     // GET & SET
 
@@ -147,7 +145,7 @@ class SupplierModel extends BaseModel implements Crud {
                 return 'La razón social "'.$this->getbusinessName().'" ya está registrada.';   
             }
 
-            $new = $this->connect()->prepare(
+            $new = Database::connect()->prepare(
                 "INSERT 
                 INTO $this->table 
                 (tradename, 
@@ -217,7 +215,7 @@ class SupplierModel extends BaseModel implements Crud {
                 return 'La razón social "'.$this->getbusinessName().'" ya está registrada.';   
             }
 
-            $update = $this->connect()->prepare(
+            $update = Database::connect()->prepare(
                 "UPDATE 
                 $this->table 
                 SET 
@@ -248,9 +246,9 @@ class SupplierModel extends BaseModel implements Crud {
             $update->bindValue(':id', $this->getId(), PDO::PARAM_INT);
 
             if($update->execute() ) {
-                header('Location: '.url_base.$_GET['controller'].'/'.$_GET['action'].'/'.$_GET['id'].'?status=1');
+                header('Location: '.URL_BASE.$_GET['controller'].'/'.$_GET['action'].'/'.$_GET['id'].'?status=1');
             }else {
-                header('Location: '.url_base.$_GET['controller'].'/'.$_GET['action'].'/'.$_GET['id'].'?status=0');
+                header('Location: '.URL_BASE.$_GET['controller'].'/'.$_GET['action'].'/'.$_GET['id'].'?status=0');
             }
 
         }catch(PDOexception $e) {

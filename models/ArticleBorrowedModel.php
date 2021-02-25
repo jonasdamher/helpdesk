@@ -1,5 +1,7 @@
 <?php 
 
+declare(strict_types=1);
+
 class ArticleBorrowedModel extends BaseModel {
 
     private int $id;
@@ -7,12 +9,9 @@ class ArticleBorrowedModel extends BaseModel {
     private int $idIncidence;
     private int $idPto;
 
-    public function __construct($conn) {
-        parent::__construct();
-        $this->conn = $conn;
+    public function __construct() {
         $this->table = 'articles_borrowed_point_of_sales';
-        $this->setSchema('ArticleBorrowedSchema');
-    }
+     }
 
     // GET & SET
 
@@ -81,7 +80,7 @@ class ArticleBorrowedModel extends BaseModel {
     private function articleExistInIncidence() {
         try {
 
-            $get = $this->connect()->prepare(
+            $get = Database::connect()->prepare(
                 "SELECT
                 $this->table._id,
                 $this->table._id_article_only
@@ -107,7 +106,7 @@ class ArticleBorrowedModel extends BaseModel {
     private function articleCurrentBorrowed() {
         try {
 
-            $get = $this->connect()->prepare(
+            $get = Database::connect()->prepare(
                 "SELECT _id
                 FROM articles_only
                 WHERE _id = :idArticle AND _id_borrowed_status = 2");
@@ -125,7 +124,7 @@ class ArticleBorrowedModel extends BaseModel {
 
     private function changeBorrowedStatusArticleOnly($currentArticle) {
        try {
-        $updateBorrowedArticleOnly = $this->connect()->prepare(
+        $updateBorrowedArticleOnly = Database::connect()->prepare(
             "UPDATE articles_only SET
             _id_borrowed_status = :status
             WHERE _id = :id");
@@ -158,7 +157,7 @@ class ArticleBorrowedModel extends BaseModel {
                 return ['valid'=> false, 'error' => 'Ese artículo está en prestamo.'];
             }
 
-            $new = $this->connect()->prepare(
+            $new = Database::connect()->prepare(
                 "INSERT INTO $this->table (_id_article_only, _id_incidence, _id_pto) 
                 VALUES (:idArticle, :idIncidence, :idPto)");
             
@@ -166,7 +165,7 @@ class ArticleBorrowedModel extends BaseModel {
             $new->bindValue(':idIncidence', $this->getIdIncidence(), PDO::PARAM_INT);
             $new->bindValue(':idPto', $this->getIdPto(), PDO::PARAM_INT);
            
-            return ($new->execute() ) ? ['valid' => true, 'id' => $this->connect()->lastInsertId()] : ['valid' => false];
+            return ($new->execute() ) ? ['valid' => true, 'id' => Database::connect()->lastInsertId()] : ['valid' => false];
             
         }catch(PDOexception $e) {
             return ['valid'=> false, 'error' => $e->getMessage()];
@@ -176,7 +175,7 @@ class ArticleBorrowedModel extends BaseModel {
     public function read() {
         try {
 
-            $get = $this->connect()->prepare(
+            $get = Database::connect()->prepare(
                 "SELECT
                 $this->table._id,
                 $this->table._id_article_only,
@@ -237,7 +236,7 @@ class ArticleBorrowedModel extends BaseModel {
                 } 
             }
 
-            $update = $this->connect()->prepare(
+            $update = Database::connect()->prepare(
                 "UPDATE $this->table SET
                 _id_article_only = :idArticle
                 WHERE _id = :id");
@@ -259,7 +258,7 @@ class ArticleBorrowedModel extends BaseModel {
     public function articlesIncidence() {
         try {
 
-            $get = $this->connect()->prepare(
+            $get = Database::connect()->prepare(
                 "SELECT
                 articles_only.serial,
                 articles_only.code,

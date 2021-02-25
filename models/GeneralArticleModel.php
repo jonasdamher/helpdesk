@@ -1,6 +1,9 @@
-<?php 
+<?php
 
-class GeneralArticleModel extends BaseModel implements Crud {
+declare(strict_types=1);
+
+class GeneralArticleModel extends BaseModel
+{
 
     private int $id;
     private string $name;
@@ -12,93 +15,110 @@ class GeneralArticleModel extends BaseModel implements Crud {
     private int $idType;
     private $image;
 
-    public function __construct($conn) {
-        parent::__construct();
-        $this->conn = $conn;
+    public function __construct()
+    {
         $this->table = 'articles';
-        $this->setSchema('GeneralArticleSchema');
     }
 
     // GET & SET
 
-    public function getId() {
+    public function getId()
+    {
         return $this->id;
     }
 
-    public function setId(int $id) {
+    public function setId(int $id)
+    {
         $this->id = $id;
     }
 
-    public function getName() {
+    public function getName()
+    {
         return $this->name;
     }
 
-    public function setName(string $name) {
+    public function setName(string $name)
+    {
         $this->name = $name;
     }
-    
-    public function getDescription() {
+
+    public function getDescription()
+    {
         return $this->description;
     }
 
-    public function setDescription(?string $description) {
+    public function setDescription(?string $description)
+    {
         $this->description = $description;
     }
 
-    public function getBarcode() {
+    public function getBarcode()
+    {
         return $this->barcode;
     }
 
-    public function setBarcode(string $barcode) {
+    public function setBarcode(string $barcode)
+    {
         $this->barcode = $barcode;
     }
-        
-    public function getCost() {
+
+    public function getCost()
+    {
         return $this->cost;
     }
 
-    public function setCost(?float $cost) {
+    public function setCost(?float $cost)
+    {
         $this->cost = $cost;
     }
 
-    public function getPvp() {
+    public function getPvp()
+    {
         return $this->pvp;
     }
 
-    public function setPvp(?float $pvp) {
+    public function setPvp(?float $pvp)
+    {
         $this->pvp = $pvp;
     }
 
-    public function getIdProvider() {
+    public function getIdProvider()
+    {
         return $this->idProvider;
     }
 
-    public function setIdProvider(int $idProvider) {
+    public function setIdProvider(int $idProvider)
+    {
         $this->idProvider = $idProvider;
     }
 
-    public function getIdType() {
+    public function getIdType()
+    {
         return $this->idType;
-    }   
+    }
 
-    public function setIdType(int $idType) {
+    public function setIdType(int $idType)
+    {
         $this->idType = $idType;
     }
-    
-    public function getImage() {
-        return $this->image;
-    }   
 
-    public function setImage($image) {
+    public function getImage()
+    {
+        return $this->image;
+    }
+
+    public function setImage($image)
+    {
         $this->image = $image;
     }
 
     /**
      *  METHODS
      *  PRIVATES METHODS
-    */ 
+     */
 
-    private function queryArticle() {
+    private function queryArticle()
+    {
 
         require_once 'libs/QueryBuild.php';
         $build = new QueryBuild();
@@ -113,20 +133,21 @@ class GeneralArticleModel extends BaseModel implements Crud {
 
     //  PUBLICS METHODS
 
-    public function create() {
+    public function create()
+    {
         try {
 
-            $existBarcode = $this->getBy('barcode', $this->getBarcode() );
+            $existBarcode = $this->getBy('barcode', $this->getBarcode());
 
-            if($existBarcode) {
-                return 'El código de barras "'.$this->getBarcode().'" ya está registrado.';
+            if ($existBarcode) {
+                return 'El código de barras "' . $this->getBarcode() . '" ya está registrado.';
             }
 
-            $imageUpload = $this->Image('articles', $this->getImage() );
+            $imageUpload = $this->Image('articles', $this->getImage());
 
-            if($imageUpload['valid']) {
+            if ($imageUpload['valid']) {
 
-                $new = $this->connect()->prepare(
+                $new = Database::connect()->prepare(
                     "INSERT INTO $this->table ( 
                         name, description, barcode, cost, pvp, _id_provider, _id_type, image
                     )
@@ -144,45 +165,46 @@ class GeneralArticleModel extends BaseModel implements Crud {
                 $new->bindValue(':idType', $this->getIdType(), PDO::PARAM_INT);
                 $new->bindValue(':image', $imageUpload['filename'], PDO::PARAM_STR);
 
-                if($new->execute() ) {
+                if ($new->execute()) {
                     return 'Artículo registrado.';
-                }else {
+                } else {
                     return 'Hubo un error al intentar registrar, intentelo mas tarde.';
                 }
-
-            }else {
+            } else {
                 return $imageUpload['errors'];
             }
-
-        }catch(PDOexception $e) {
+        } catch (PDOexception $e) {
             return $e->getMessage();
         }
     }
 
-    public function read() {
-        return $this->getById($this->getId() );
+    public function read()
+    {
+        return $this->getById($this->getId());
     }
 
-    public function readAll() {
-        return $this->getAllQuery($this->queryArticle() );
+    public function readAll()
+    {
+        return $this->getAllQuery($this->queryArticle());
     }
 
-    public function update() {
+    public function update()
+    {
         try {
 
-            $existBarcode = $this->getBy('barcode', $this->getBarcode() );
+            $existBarcode = $this->getBy('barcode', $this->getBarcode());
 
-            if($existBarcode && $existBarcode['_id'] != $this->getId() ) {
-                return 'El código de barras "'.$this->getBarcode().'" ya está registrado.';
+            if ($existBarcode && $existBarcode['_id'] != $this->getId()) {
+                return 'El código de barras "' . $this->getBarcode() . '" ya está registrado.';
             }
 
             $article = $this->read();
             $imageUpload = $this->Image('articles', ['CurrentimageName' => $article['image'], 'updateImage' => $this->getImage()], 'update');
 
-            if($imageUpload['valid']) {
+            if ($imageUpload['valid']) {
                 $image = !is_null($imageUpload['filename']) ? ', image = :image' : '';
 
-                $update = $this->connect()->prepare(
+                $update = Database::connect()->prepare(
                     "UPDATE $this->table SET
                     name = :name,
                     description = :description,
@@ -192,7 +214,8 @@ class GeneralArticleModel extends BaseModel implements Crud {
                     _id_provider = :idProvider,
                     _id_type = :idType
                     $image
-                    WHERE _id = :id");
+                    WHERE _id = :id"
+                );
 
                 $update->bindValue(':name', $this->getName(), PDO::PARAM_STR);
                 $update->bindValue(':description', $this->getDescription(), PDO::PARAM_STR);
@@ -202,35 +225,34 @@ class GeneralArticleModel extends BaseModel implements Crud {
                 $update->bindValue(':idProvider', $this->getIdProvider(), PDO::PARAM_INT);
                 $update->bindValue(':idType', $this->getIdType(), PDO::PARAM_INT);
 
-                if(!is_null($imageUpload['filename']) ) {
+                if (!is_null($imageUpload['filename'])) {
                     $update->bindValue(':image', $imageUpload['filename'], PDO::PARAM_STR);
                 }
-                              
+
                 $update->bindValue(':id', $this->getId(), PDO::PARAM_INT);
 
-                if($update->execute() ) {
-                    header('Location: '.url_base.$_GET['controller'].'/'.$_GET['action'].'/'.$_GET['id'].'?status=1');
-                }else {
-                    header('Location: '.url_base.$_GET['controller'].'/'.$_GET['action'].'/'.$_GET['id'].'?status=0');
+                if ($update->execute()) {
+                    header('Location: ' . URL_BASE . $_GET['controller'] . '/' . $_GET['action'] . '/' . $_GET['id'] . '?status=1');
+                } else {
+                    header('Location: ' . URL_BASE . $_GET['controller'] . '/' . $_GET['action'] . '/' . $_GET['id'] . '?status=0');
                 }
-                
-            }else {
+            } else {
                 return $imageUpload['errors'];
             }
-
-        }catch(PDOexception $e) {
+        } catch (PDOexception $e) {
             return $e->getMessage();
-        } 
+        }
     }
 
-    public function delete() {
-       
+    public function delete()
+    {
     }
 
-    public function getDetails() {
-        try{
+    public function getDetails()
+    {
+        try {
 
-            $get = $this->connect()->prepare(
+            $get = Database::connect()->prepare(
                 "SELECT 
                 $this->table._id,
                 $this->table.name, 
@@ -249,38 +271,42 @@ class GeneralArticleModel extends BaseModel implements Crud {
                 INNER JOIN art_types
                 ON $this->table._id_type = art_types._id
                 WHERE $this->table._id = :id
-            ");
+            "
+            );
 
             $get->bindValue(':id', $this->getId(), PDO::PARAM_INT);
             $get->execute();
             $result = $get->fetch(PDO::FETCH_ASSOC);
-            
+
             $get = null;
             return $result;
-
-        }catch(PDOexception $e) {
+        } catch (PDOexception $e) {
             return $e->getMessage();
         }
     }
 
     // OTHERS METHODS
 
-    public function paginations() {
-        return $this->pagination('paginations', $this->queryArticle() );
+    public function paginations()
+    {
+        return $this->pagination('paginations', $this->queryArticle());
     }
 
-    public function getArticlesTypes() {
+    public function getArticlesTypes()
+    {
         return $this->getAllOtherTable('art_types');
     }
 
-    public function getProviders() {
+    public function getProviders()
+    {
         return $this->getAllOtherTable('suppliers');
     }
 
-    public function addUnit() {
+    public function addUnit()
+    {
         try {
 
-            $update = $this->connect()->prepare(
+            $update = Database::connect()->prepare(
                 "UPDATE 
                 $this->table 
                 SET 
@@ -290,19 +316,18 @@ class GeneralArticleModel extends BaseModel implements Crud {
 
             $update->bindValue(':id', $this->getId(), PDO::PARAM_INT);
 
-            return ($update->execute() ) ? ['valid' => true] : ['valid' => false];
+            return ($update->execute()) ? ['valid' => true] : ['valid' => false];
+        } catch (PDOexception $e) {
 
-        }catch(PDOexception $e) {
-            
             return $e->getMessage();
-
         }
     }
 
-    public function removeUnit() {
+    public function removeUnit()
+    {
         try {
 
-            $update = $this->connect()->prepare(
+            $update = Database::connect()->prepare(
                 "UPDATE 
                 $this->table 
                 SET 
@@ -312,15 +337,10 @@ class GeneralArticleModel extends BaseModel implements Crud {
 
             $update->bindValue(':id', $this->getId(), PDO::PARAM_INT);
 
-            return ($update->execute() ) ? ['valid' => true] : ['valid' => false];
+            return ($update->execute()) ? ['valid' => true] : ['valid' => false];
+        } catch (PDOexception $e) {
 
-        }catch(PDOexception $e) {
-            
             return $e->getMessage();
-
         }
     }
-    
 }
-
-?>

@@ -1,5 +1,7 @@
 <?php 
 
+declare(strict_types=1);
+
 class IncidenceModel extends BaseModel {
 
     private int $id;
@@ -11,12 +13,9 @@ class IncidenceModel extends BaseModel {
     private int $idStatus;
     private int $idType;
 
-    public function __construct($conn) {
-        parent::__construct();
-        $this->conn = $conn;
-        $this->table = 'incidences';
-        $this->setSchema('IncidenceSchema');
-    }
+    public function __construct() {
+         $this->table = 'incidences';
+     }
 
     // GET & SET
 
@@ -137,7 +136,7 @@ class IncidenceModel extends BaseModel {
     public function create() {
         try {
 
-            $new = $this->connect()->prepare(
+            $new = Database::connect()->prepare(
                 "INSERT INTO $this->table 
                 (subject, description, _id_pto_of_sales, _id_user_created, _id_attended, _id_priority, _id_status, _id_type) 
                 VALUES (:subject, :description, :idPto, :idUser, :idUserAttended, :idPriority, :idStatus, :idType)");
@@ -173,7 +172,7 @@ class IncidenceModel extends BaseModel {
     public function verifyArticlesBorrowed() {
         try {
 
-            $get = $this->connect()->prepare(
+            $get = Database::connect()->prepare(
                 "SELECT
                 articles_borrowed_point_of_sales
                 FROM
@@ -212,7 +211,7 @@ class IncidenceModel extends BaseModel {
 
             }
 
-            $update = $this->connect()->prepare(
+            $update = Database::connect()->prepare(
                 "UPDATE $this->table SET 
                 subject = :subject,
                 description = :description, 
@@ -237,9 +236,9 @@ class IncidenceModel extends BaseModel {
             $update->bindValue(':id', $this->getId(), PDO::PARAM_INT);
 
             if($update->execute() ) {
-                header('Location: '.url_base.$_GET['controller'].'/'.$_GET['action'].'/'.$_GET['id'].'?status=1');
+                header('Location: '.URL_BASE.$_GET['controller'].'/'.$_GET['action'].'/'.$_GET['id'].'?status=1');
             }else {
-                header('Location: '.url_base.$_GET['controller'].'/'.$_GET['action'].'/'.$_GET['id'].'?status=0');
+                header('Location: '.URL_BASE.$_GET['controller'].'/'.$_GET['action'].'/'.$_GET['id'].'?status=0');
             }
         }catch(PDOexception $e) {
             return $e->getMessage();
@@ -249,7 +248,7 @@ class IncidenceModel extends BaseModel {
     public function getDetails() {
         try{
 
-            $get = $this->connect()->prepare(
+            $get = Database::connect()->prepare(
                 "SELECT 
                 $this->table._id, 
                 $this->table.subject, 

@@ -1,5 +1,7 @@
 <?php 
 
+declare(strict_types=1);
+
 class ArticleModel extends BaseModel {
 
     private int $id;
@@ -10,12 +12,9 @@ class ArticleModel extends BaseModel {
     private ?string $code;
     private ?string $observations;
 
-    public function __construct($conn) {
-        parent::__construct();
-        $this->conn = $conn;
-        $this->table = 'articles_only';
-        $this->setSchema('ArticleSchema');
-    }
+    public function __construct() {
+         $this->table = 'articles_only';
+     }
 
     // GET & SET
 
@@ -108,7 +107,7 @@ class ArticleModel extends BaseModel {
     public function create() {
         try {
 
-            $new = $this->connect()->prepare(
+            $new = Database::connect()->prepare(
                 "INSERT 
                 INTO $this->table 
                 (
@@ -132,7 +131,7 @@ class ArticleModel extends BaseModel {
             $new->bindValue(':observations', $this->getObservations(), PDO::PARAM_STR);
             $new->bindValue(':idStatus', $this->getIdStatus(), PDO::PARAM_INT);
 
-            return ($new->execute() ) ? ['valid' => true, 'id' => $this->connect()->lastInsertId()] : ['valid' => false];
+            return ($new->execute() ) ? ['valid' => true, 'id' => Database::connect()->lastInsertId()] : ['valid' => false];
             
         }catch(PDOexception $e) {
             return ['valid'=> false, 'error' => $e->getMessage()];
@@ -142,7 +141,7 @@ class ArticleModel extends BaseModel {
     public function read() {
         try {
 
-            $get = $this->connect()->prepare(
+            $get = Database::connect()->prepare(
                 "SELECT
                 $this->table._id,
                 $this->table._id_article,
@@ -179,7 +178,7 @@ class ArticleModel extends BaseModel {
     public function update() {
         try {
 
-            $update = $this->connect()->prepare(
+            $update = Database::connect()->prepare(
                 "UPDATE $this->table SET
                 serial = :serial, 
                 code = :code, 
@@ -225,7 +224,7 @@ class ArticleModel extends BaseModel {
     public function getNotBorrowed() {
         try {
 
-            $get = $this->connect()->prepare(
+            $get = Database::connect()->prepare(
                 "SELECT
                 $this->table._id,
                 $this->table.serial,
@@ -252,7 +251,7 @@ class ArticleModel extends BaseModel {
     public function updateBorrowed() {
         try {
 
-            $update = $this->connect()->prepare(
+            $update = Database::connect()->prepare(
                 "UPDATE $this->table SET
                 _id_borrowed_status = :idBorrowed
                 WHERE $this->table._id = :id");
@@ -268,7 +267,7 @@ class ArticleModel extends BaseModel {
     public function totalBorrowed() {
         try {
 
-            $get = $this->connect()->prepare(
+            $get = Database::connect()->prepare(
                 "SELECT art_borrowed_status.status, COUNT(*) as total
                 FROM $this->table
                 INNER JOIN art_borrowed_status
