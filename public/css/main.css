@@ -2,8 +2,8 @@
   font-family: 'Montserrat';
   font-style: normal;
   font-weight: 400;
-  src: local('Montserrat Regular'), local('Montserrat-Regular'), url(Montserrat-Regular.ttf) format('ttf');
-  font-display: swap;
+  font-display: optional;
+  src: local('Montserrat Regular'), local('Montserrat-Regular'), url(https://helpdesk.dev/public/fonts/Montserrat-Regular.ttf) format('ttf');
 }
 
 * {
@@ -412,6 +412,7 @@ span.icon~input.ipt, button.icon~input.ipt {
 
 .navbar-horizontal li {
   width: auto;
+  margin-right: .3rem;
   position: initial;
 }
 
@@ -419,6 +420,8 @@ span.icon~input.ipt, button.icon~input.ipt {
   padding: .5rem .8rem;
   display: flex;
   text-decoration: none;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
 }
 
 .navbar-horizontal li a span {
@@ -462,6 +465,7 @@ span.icon~input.ipt, button.icon~input.ipt {
 
 .btn-dropdown {
   font-size: 16px;
+  z-index: 4;
 }
 
 .btn-dropdown span:first-child {
@@ -481,7 +485,6 @@ span.icon~input.ipt, button.icon~input.ipt {
 .dropdown {
   position: relative;
   display: flex;
-  z-index: 4;
 }
 
 .dropdown-min {
@@ -494,7 +497,7 @@ span.icon~input.ipt, button.icon~input.ipt {
   top: 45px;
   right: 0;
   background-color: #ffffff;
-  z-index: 1;
+  z-index: 5;
 }
 
 .dropdown-list ul {
