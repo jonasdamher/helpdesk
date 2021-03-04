@@ -11,7 +11,7 @@ class Head
 	private static string $lang = 'es';
 	private static string $title = '';
 	private static string $canonical = '';
-	private static string $robots = 'index, follow';
+	private static string $robots = 'noindex, nofollow';
 	private static string $description = 'helpdesk, administrador de incidencias.';
 	private static string $keyWords = 'helpdesk, incidencias informaticas';
 

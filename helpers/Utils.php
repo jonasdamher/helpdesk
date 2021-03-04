@@ -84,12 +84,12 @@ class Utils
 
   public static function getCheck(string $name): string
   {
-    return $_GET[$name] ?? '';
+    return filter_var(trim($_GET[$name] ?? ''), FILTER_SANITIZE_STRING);
   }
 
   public static function postCheck(string $name): string
   {
-    return $_POST[$name] ?? '';
+    return filter_var(trim($_POST[$name] ?? ''), FILTER_SANITIZE_STRING);
   }
 
   public static function fileCheck(string $name): mixed
@@ -233,5 +233,26 @@ class Utils
   public static function redirection(string $to = ''): void
   {
     header('Location:' . URL_BASE . $to);
+  }
+
+  /**
+   * Devuelve el nombre de sección de la página web.
+   */
+  public static function getSection(): string
+  {
+    $controller = filter_var(trim($_GET['controller'] ?? ''), FILTER_SANITIZE_STRING);
+    $action = filter_var(trim($_GET['action'] ?? ''), FILTER_SANITIZE_STRING);
+    $list = $_SESSION['permission_page'] ?? [];
+    $section = '';
+
+    if (array_key_exists($controller, $list)) {
+      foreach ($list[$controller] as $page) {
+        if ($page['action'] == $action) {
+          $section = $page['title'];
+          break;
+        }
+      }
+    }
+    return $section;
   }
 }

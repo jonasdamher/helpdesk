@@ -35,7 +35,7 @@ class View
 			Utils::redirection('error/500');
 		}
 
-		self::$currentView['controller'] = $controller;
+		self::$currentView['controller'] = ucfirst($controller);
 		self::$currentView['action'] = $action;
 
 		return 'views/index.php';
