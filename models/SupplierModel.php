@@ -1,8 +1,9 @@
-<?php 
+<?php
 
 declare(strict_types=1);
 
-class SupplierModel extends BaseModel {
+class SupplierModel extends BaseModel
+{
 
     private int $id;
     private string $tradename;
@@ -16,133 +17,157 @@ class SupplierModel extends BaseModel {
     private ?int $phone;
     private ?string $email;
 
-    public function __construct() {
-         $this->table = 'suppliers';
-     }
-    
+    public function __construct()
+    {
+        $this->table = 'suppliers';
+    }
+
     // GET & SET
 
-    public function getId() {
+    public function getId()
+    {
         return $this->id;
     }
 
-    public function setId(int $id) {
+    public function setId(int $id)
+    {
         $this->id = $id;
     }
 
-    public function getTradename() {
+    public function getTradename()
+    {
         return $this->tradename;
     }
 
-    public function setTradename(string $tradename) {
+    public function setTradename(string $tradename)
+    {
         $this->tradename = $tradename;
     }
 
-    public function getbusinessName() {
+    public function getbusinessName()
+    {
         return $this->businessName;
     }
 
-    public function setbusinessName(string $business_name) {
+    public function setbusinessName(string $business_name)
+    {
         $this->businessName = $business_name;
     }
 
-    public function getCif() {
+    public function getCif()
+    {
         return $this->cif;
     }
 
-    public function setCif(string $cif) {
+    public function setCif(string $cif)
+    {
         $this->cif = $cif;
-        
     }
-    
-    public function getIdCountry() {
+
+    public function getIdCountry()
+    {
         return $this->idCountry;
     }
 
-    public function setIdCountry(?int $idCountry) {
+    public function setIdCountry(?int $idCountry)
+    {
         $this->idCountry = $idCountry;
     }
-        
-    public function getProvince() {
+
+    public function getProvince()
+    {
         return $this->province;
     }
 
-    public function setProvince(?string $province) {
+    public function setProvince(?string $province)
+    {
         $this->province = $province;
     }
 
-    public function getLocality() {
+    public function getLocality()
+    {
         return $this->locality;
     }
 
-    public function setLocality(?string $locality) {
+    public function setLocality(?string $locality)
+    {
         $this->locality = $locality;
     }
 
-    public function getPostalCode() {
+    public function getPostalCode()
+    {
         return $this->postalCode;
     }
 
-    public function setPostalCode(?int $postalCode) {
+    public function setPostalCode(?int $postalCode)
+    {
         $this->postalCode = $postalCode;
     }
 
-    public function getAddress() {
+    public function getAddress()
+    {
         return $this->address;
-    }   
+    }
 
-    public function setAddress(?string $address) {
+    public function setAddress(?string $address)
+    {
         $this->address = $address;
     }
 
-    public function getPhone() {
+    public function getPhone()
+    {
         return $this->phone;
     }
 
-    public function setPhone(?int $phone) {
+    public function setPhone(?int $phone)
+    {
         $this->phone = $phone;
     }
 
-    public function getEmail() {
+    public function getEmail()
+    {
         return $this->email;
     }
 
-    public function setEmail(?string $email) {
+    public function setEmail(?string $email)
+    {
         $this->email = $email;
-    }  
-    
+    }
+
     /**
-    *  METHODS
-    *  PRIVATES METHODS
-   */ 
+     *  METHODS
+     *  PRIVATES METHODS
+     */
 
-   private function querySuppliers() {
+    private function querySuppliers()
+    {
 
-       require_once 'libs/QueryBuild.php';
-       $build = new QueryBuild();
+        require_once 'libs/QueryBuild.php';
+        $build = new QueryBuild();
 
-       $build->setSelect("_id, tradename, business_name, cif, phone, email, created");
-       $build->setFrom($this->table);
-       $build->setSearch("$this->table.tradename LIKE :search OR $this->table.business_name LIKE :search OR $this->table.cif LIKE :search OR $this->table.email LIKE :search");
-           
-       return $build->query();
-   }
+        $build->setSelect("_id, tradename, business_name, cif, phone, email, created");
+        $build->setFrom($this->table);
+        $build->setSearch("$this->table.tradename LIKE :search OR $this->table.business_name LIKE :search OR $this->table.cif LIKE :search OR $this->table.email LIKE :search");
+
+        return $build->query();
+    }
 
     //  PUBLICS METHODS
 
-    public function create() {
+    public function create()
+    {
         try {
-            
-            $existCif = $this->getBy('cif', $this->getCif() );
-            
-            if($existCif) {
-                return 'El cif "'.$this->getCif().'" ya está registrado.';
+
+            $existCif = $this->getBy('cif', $this->getCif());
+
+            if ($existCif['valid']) {
+                throw new Exception('El cif "' . $this->getCif() . '" ya está registrado.');
             }
 
-            $existBusinessName = $this->getBy('business_name', $this->getbusinessName() );
-        
-            if($existBusinessName) {
-                return 'La razón social "'.$this->getbusinessName().'" ya está registrada.';   
+            $existBusinessName = $this->getBy('business_name', $this->getbusinessName());
+
+            if ($existBusinessName['valid']) {
+                throw new Exception('La razón social "' . $this->getbusinessName() . '" ya está registrada.');
             }
 
             $new = Database::connect()->prepare(
@@ -180,39 +205,44 @@ class SupplierModel extends BaseModel {
             $new->bindValue(':address', $this->getAddress(), PDO::PARAM_STR);
             $new->bindValue(':phone', $this->getPhone(), PDO::PARAM_INT);
             $new->bindValue(':email', $this->getEmail(), PDO::PARAM_STR);
+            $new->execute();
 
-            if($new->execute() ) {
-                return 'Proveedor registrado.';
-            }else {
-                return 'Hubo un error al intentar registrar, intentalo mas tarde';
-            }
-
-        }catch(PDOexception $e) {
-            return $e->getMessage();
+            $result = ['id' => Database::connect()->lastInsertId()];
+            $this->success($result, 'Proveedor registrado.');
+        } catch (Exception $e) {
+            $this->status(404)->fail($e->getMessage());
+        } catch (PDOexception $e) {
+            $this->status(500)->fail($e->getMessage());
+        } finally {
+            $new = null;
+            Database::disconnect();
+            return $this->send();
         }
     }
 
-    public function read() {
-        return $this->getById($this->getId() );
+    public function read()
+    {
+        return $this->getById($this->getId());
     }
 
-    public function readAll() {
-        return $this->getAllQuery($this->querySuppliers() );
+    public function readAll()
+    {
+        return $this->getAllQuery($this->querySuppliers());
     }
 
-    public function update() {
+    public function update()
+    {
         try {
-            
-            $existCif = $this->getBy('cif', $this->getCif() );
-            
-            if($existCif && $existCif['_id'] != $this->getId() ) {
-                return 'El cif "'.$this->getCif().'" ya está registrado.';
+            $existCif = $this->getBy('cif', $this->getCif());
+
+            if ($existCif['valid'] && $existCif['result']['_id'] != $this->getId()) {
+                throw new Exception('El cif "' . $this->getCif() . '" ya está registrado.');
             }
 
-            $existBusinessName = $this->getBy('business_name', $this->getbusinessName() );
-        
-            if($existBusinessName && $existBusinessName['_id'] != $this->getId() ) {
-                return 'La razón social "'.$this->getbusinessName().'" ya está registrada.';   
+            $existBusinessName = $this->getBy('business_name', $this->getbusinessName());
+
+            if ($existBusinessName['valid'] && $existBusinessName['result']['_id'] != $this->getId()) {
+                throw new Exception('La razón social "' . $this->getbusinessName() . '" ya está registrada.');
             }
 
             $update = Database::connect()->prepare(
@@ -242,34 +272,31 @@ class SupplierModel extends BaseModel {
             $update->bindValue(':address', $this->getAddress(), PDO::PARAM_STR);
             $update->bindValue(':phone', $this->getPhone(), PDO::PARAM_INT);
             $update->bindValue(':email', $this->getEmail(), PDO::PARAM_STR);
-
             $update->bindValue(':id', $this->getId(), PDO::PARAM_INT);
-
-            if($update->execute() ) {
-                header('Location: '.URL_BASE.$_GET['controller'].'/'.$_GET['action'].'/'.$_GET['id'].'?status=1');
-            }else {
-                header('Location: '.URL_BASE.$_GET['controller'].'/'.$_GET['action'].'/'.$_GET['id'].'?status=0');
-            }
-
-        }catch(PDOexception $e) {
-            return $e->getMessage();
+            $update->execute();
+            
+            $result = ['id' => $this->getId()];
+            $this->success($result, 'Proveedor actualizado.');
+        } catch (Exception $e) {
+            $this->status(404)->fail($e->getMessage());
+        } catch (PDOexception $e) {
+            $this->status(500)->error($e->getMessage());
+        } finally {
+            $update = null;
+            Database::disconnect();
+            return $this->send();
         }
-    }
-
-    public function delete() {
-
     }
 
     // OTHERS METHODS
 
-    public function paginations() {
-        return $this->pagination('paginations', $this->querySuppliers() );
+    public function paginations()
+    {
+        return $this->pagination('paginations', $this->querySuppliers());
     }
 
-    public function getCountries() {
+    public function getCountries()
+    {
         return $this->getAllOtherTable('countries');
     }
-
 }
-
-?>

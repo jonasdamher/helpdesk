@@ -19,74 +19,74 @@ class UserModel extends BaseModel
         $this->table = 'users';
     }
 
-    public function getId()
+    public function getId(): int
     {
         return $this->id;
     }
 
-    public function setId(int $id): void
+    public function setId($id): void
     {
-        $this->id = $id;
+        $this->id = $this->validate($id)->require()->int();
     }
 
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
 
     public function setName(string $name): void
     {
-        $this->name = $name;
+        $this->name = $this->validate($name)->string();
     }
 
-    public function getLastname()
+    public function getLastname(): string
     {
         return $this->lastname;
     }
 
     public function setLastname(string $lastname): void
     {
-        $this->lastname = $lastname;
+        $this->lastname = $this->validate($lastname)->string();
     }
 
-    public function getEmail()
+    public function getEmail(): string
     {
         return $this->email;
     }
 
     public function setEmail(string $email): void
     {
-        $this->email = $email;
+        $this->email = $this->validate($email)->require()->email();
     }
 
-    public function getPassword()
+    public function getPassword(): string
     {
         return $this->password;
     }
 
     public function setPassword(string $password): void
     {
-        $this->password = $password;
+        $this->password = $this->validate($password)->require()->string();
     }
 
-    public function getIdRol()
+    public function getIdRol(): int
     {
         return $this->idRol;
     }
 
-    public function setIdRol(int $id_rol): void
+    public function setIdRol($id_rol): void
     {
-        $this->idRol = $id_rol;
+        $this->idRol = $this->validate($id_rol)->require()->int();
     }
 
-    public function getIdStatus()
+    public function getIdStatus(): int
     {
         return $this->idStatus;
     }
 
-    public function setIdStatus(int $id_status): void
+    public function setIdStatus($id_status): void
     {
-        $this->idStatus = $id_status;
+        $this->idStatus = $this->validate($id_status)->require()->int();
     }
 
     public function getImage()
@@ -125,11 +125,11 @@ class UserModel extends BaseModel
 
     private function sessionUser($userData): void
     {
-        $_SESSION['user_init'] = (int) $userData['_id'];
+        $_SESSION['user_init'] = $userData['_id'];
         $_SESSION['name'] = $userData['name'];
         $_SESSION['lastname'] = $userData['lastname'];
         $_SESSION['email'] = $userData['email'];
-        $_SESSION['rol'] = (int) $userData['_id_rol'];
+        $_SESSION['rol'] = $userData['_id_rol'];
         $_SESSION['image'] = $userData['image'];
     }
 
@@ -221,26 +221,27 @@ class UserModel extends BaseModel
 
             $existEmail = $this->getBy('email', $this->getEmail());
 
-            if (is_null($existEmail['result'])) {
+            if ($existEmail['valid']) {
                 $this->status(404);
                 throw new Exception('El correo "' . $this->getEmail() . '" ya está registrado.');
             }
-
+            /*
             $imageUpload = $this->Image('users', $this->getImage());
-
             if (!$imageUpload['valid']) {
                 throw new Exception($imageUpload['errors']);
             }
-
+            */
             $userNew = Database::connect()->prepare(
                 "INSERT 
-                    INTO $this->table 
-                    (name, lastname, 
-                    email, password, 
-                    _id_status, _id_rol,image) 
-                    VALUES (:name, :lastname, 
-                    :email, :password, 
-                    :idStatus, :idRol, :image)"
+                INTO $this->table 
+                (name, lastname, 
+                email, password, 
+                _id_status, _id_rol,--image
+                ) 
+                VALUES (:name, :lastname, 
+                :email, :password, 
+                :idStatus, :idRol,--:image
+                )"
             );
 
             $userNew->bindValue(':name', $this->getName(), PDO::PARAM_STR);
@@ -249,18 +250,18 @@ class UserModel extends BaseModel
             $userNew->bindValue(':password', $this->passHas(), PDO::PARAM_STR);
             $userNew->bindValue(':idStatus', $this->getIdStatus(), PDO::PARAM_INT);
             $userNew->bindValue(':idRol', $this->getIdRol(), PDO::PARAM_INT);
-            $userNew->bindValue(':image', $imageUpload['filename'], PDO::PARAM_STR);
+            // $userNew->bindValue(':image', $imageUpload['filename'], PDO::PARAM_STR);
+            $userNew->execute();
 
-            if ($userNew->execute()) {
-                Utils::redirection($_GET['controller'] . '/' . $_GET['action'] . '?status=1');
-            } else {
-                Utils::redirection($_GET['controller'] . '/' . $_GET['action'] . '?status=0');
-            }
+            $result = ['id' => Database::connect()->lastInsertId()];
+            $this->success($result, 'Usuario registrado.');
         } catch (Exception $e) {
             $this->fail($e->getMessage());
         } catch (PDOexception $e) {
             $this->status(500)->error($e->getMessage());
         } finally {
+            $userNew = null;
+            Database::disconnect();
             return $this->send();
         }
     }
@@ -297,15 +298,13 @@ class UserModel extends BaseModel
             $get->execute();
 
             if (!$get->rowCount()) {
-                $this->status(404);
                 throw new Exception('Usuario no encontrado.');
             }
 
             $result = $get->fetch(PDO::FETCH_ASSOC);
-
             $this->success($result);
         } catch (Exception $e) {
-            $this->fail($e->getMessage());
+            $this->status(404)->fail($e->getMessage());
         } catch (PDOexception $e) {
             $this->status(500)->error($e->getMessage());
         } finally {
@@ -320,27 +319,23 @@ class UserModel extends BaseModel
         return $this->getAllQuery($this->queryUsers());
     }
 
-    public function update()
+    public function update(): array
     {
         try {
 
             $existEmail = $this->getBy('email', $this->getEmail());
 
-            if (is_null($existEmail['result']) && $existEmail['result']['_id'] != $this->getId()) {
-                $this->status(404);
+            if ($existEmail['valid'] && $existEmail['result']['_id'] != $this->getId()) {
                 throw new Exception('El correo "' . $this->getEmail() . '" ya está registrado.');
             }
 
-            $user = $this->read();
-
+            /*
             $imageUpload = $this->Image('users', ['CurrentimageName' => $user['image'], 'updateImage' => $this->getImage()], 'update');
-
             if ($imageUpload['valid']) {
                 throw new Exception($imageUpload['errors']);
             }
-
             $image = !is_null($imageUpload['filename']) ? ', image = :image' : '';
-
+            */
             $update = Database::connect()->prepare(
                 "UPDATE 
                     $this->table 
@@ -349,8 +344,7 @@ class UserModel extends BaseModel
                     lastname = :lastname, 
                     email = :email, 
                     _id_rol = :rol, 
-                    _id_status = :status
-                    $image
+                    _id_status = :status 
                     WHERE _id = :id"
             );
 
@@ -359,24 +353,21 @@ class UserModel extends BaseModel
             $update->bindValue(':email', $this->getEmail(), PDO::PARAM_STR);
             $update->bindValue(':rol', $this->getIdRol(), PDO::PARAM_INT);
             $update->bindValue(':status', $this->getIdStatus(), PDO::PARAM_INT);
-
+            /*
             if (!is_null($imageUpload['filename'])) {
-
                 $update->bindValue(':image', $imageUpload['filename'], PDO::PARAM_STR);
             }
-
+            */
             $update->bindValue(':id', $this->getId(), PDO::PARAM_INT);
+            $update->execute();
 
-            if ($update->execute()) {
-
-                if ($_SESSION['user_init'] == $user['_id']) {
-                    $this->sessionUser($this->read());
-                }
-                Utils::redirection($_GET['controller'] . '/' . $_GET['action'] . '/' . $_GET['id'] . '?status=1');
+            $newData = $this->read();
+            if ($_SESSION['user_init'] == $this->getId()) {
+                $this->sessionUser($newData);
             }
-            Utils::redirection($_GET['controller'] . '/' . $_GET['action'] . '/' . $_GET['id'] . '?status=0');
+            $this->success($newData, 'Usuario actualizado.');
         } catch (Exception $e) {
-            $this->fail($e->getMessage());
+            $this->status(404)->fail($e->getMessage());
         } catch (PDOexception $e) {
             $this->status(500)->error($e->getMessage());
         } finally {
@@ -386,7 +377,7 @@ class UserModel extends BaseModel
         }
     }
 
-    public function updatePassword()
+    public function updatePassword(): array
     {
         try {
             $update = Database::connect()->prepare(
@@ -397,14 +388,12 @@ class UserModel extends BaseModel
 
             $update->bindValue(':password', $this->passHas(), PDO::PARAM_STR);
             $update->bindValue(':id', $this->getId(), PDO::PARAM_INT);
+            $update->execute();
 
-            if ($update->execute()) {
-                Utils::redirection($_GET['controller'] . '/' . $_GET['action'] . '?status=1');
-            } else {
-                Utils::redirection($_GET['controller'] . '/' . $_GET['action'] . '?status=0');
-            }
+            $result = ['id' => $this->getId()];
+            $this->success($result, 'Usuario actualizado.');
         } catch (PDOexception $e) {
-            $this->fail($e->getMessage());
+            $this->status(500)->fail($e->getMessage());
         } finally {
             $update = null;
             Database::disconnect();
@@ -419,13 +408,15 @@ class UserModel extends BaseModel
             $userResponse = $this->read();
 
             if (!password_verify($this->getPassword(), $userResponse['result']['password'])) {
-                throw new Exception('La contraseña actual no es correcta.');
+                throw new Exception('Las credenciales no coinciden.');
             }
 
-            $this->success(null);
+            $this->success(['id' => $userResponse['result']['_id']]);
         } catch (Exception $e) {
-            $this->fail($e->getMessage());
+            $this->status(401)->fail($e->getMessage());
         } finally {
+            $userResponse = null;
+            Database::disconnect();
             return $this->send();
         }
     }
@@ -433,7 +424,6 @@ class UserModel extends BaseModel
     public function login(): array
     {
         try {
-
             $userResponse = $this->getBy('email', $this->getEmail());
             if (!$userResponse['valid']) {
                 $this->status(404);
@@ -456,6 +446,8 @@ class UserModel extends BaseModel
         } catch (Exception $e) {
             $this->fail($e->getMessage());
         } finally {
+            $userResponse = null;
+            Database::disconnect();
             return $this->send();
         }
     }

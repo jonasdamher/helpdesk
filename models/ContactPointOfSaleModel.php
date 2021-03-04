@@ -18,24 +18,24 @@ class ContactPointOfSaleModel extends BaseModel
 
     // GET & SET
 
-    public function getId()
+    public function getId(): int
     {
         return $this->id;
     }
 
-    public function setId(int $id)
+    public function setId($id): void
     {
-        $this->id = $id;
+        $this->id = $this->validate($id)->require()->int();
     }
 
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
 
-    public function setName(string $name)
+    public function setName(string $name): void
     {
-        $this->name = $name;
+        $this->name =  $this->validate($name)->require()->string();
     }
 
     public function getPhone()
@@ -43,29 +43,29 @@ class ContactPointOfSaleModel extends BaseModel
         return $this->phone;
     }
 
-    public function setPhone(?int $phone)
+    public function setPhone($phone): void
     {
-        $this->phone = $phone;
+        $this->phone = $this->validate($phone)->int();
     }
 
-    public function getEmail()
+    public function getEmail(): string
     {
         return $this->email;
     }
 
-    public function setEmail(?string $email)
+    public function setEmail(string $email): void
     {
-        $this->email = $email;
+        $this->email = $this->validate($email)->require()->email();
     }
 
-    public function getIdPto()
+    public function getIdPto(): int
     {
         return $this->idPto;
     }
 
-    public function setIdPto(int $idPto)
+    public function setIdPto($idPto): void
     {
-        $this->idPto = $idPto;
+        $this->idPto = $this->validate($idPto)->require()->int();
     }
 
     /**
@@ -73,7 +73,7 @@ class ContactPointOfSaleModel extends BaseModel
      *  PRIVATES METHODS
      */
 
-    private function queryContact()
+    private function queryContact(): array
     {
 
         require_once 'libs/QueryBuild.php';
@@ -89,46 +89,44 @@ class ContactPointOfSaleModel extends BaseModel
 
     //  PUBLICS METHODS
 
-    public function create()
+    public function create(): array
     {
         try {
 
             $new = Database::connect()->prepare(
                 "INSERT 
-                INTO $this->table 
-                    (name, 
-                    phone, 
-                    email,
-                    _id_pto) 
-                VALUES 
-                    (:name, 
-                    :phone, 
-                    :email,
-                    :idPto)"
+                INTO $this->table (name, phone, email, _id_pto) 
+                VALUES (:name, :phone, :email, :idPto)"
             );
 
             $new->bindValue(':name', $this->getName(), PDO::PARAM_STR);
             $new->bindValue(':phone', $this->getPhone(), PDO::PARAM_INT);
             $new->bindValue(':email', $this->getEmail(), PDO::PARAM_STR);
             $new->bindValue(':idPto', $this->getIdPto(), PDO::PARAM_INT);
+            $new->execute();
 
-            return ($new->execute()) ? ['valid' => true, 'id' => Database::connect()->lastInsertId()] : ['valid' => false];
+            $id = ['id' => Database::connect()->lastInsertId()];
+            $this->success($id);
         } catch (PDOexception $e) {
-            return ['valid' => false, 'error' => $e->getMessage()];
+            $this->error($e->getMessage());
+        } finally {
+            $new = null;
+            Database::disconnect();
+            return $this->send();
         }
     }
 
-    public function read()
+    public function read(): array
     {
         return $this->getById($this->getId());
     }
 
-    public function readAll()
+    public function readAll(): array
     {
         return $this->getAllQuery($this->queryContact());
     }
 
-    public function update()
+    public function update(): array
     {
         try {
 
@@ -144,16 +142,22 @@ class ContactPointOfSaleModel extends BaseModel
             $update->bindValue(':phone', $this->getPhone(), PDO::PARAM_INT);
             $update->bindValue(':email', $this->getEmail(), PDO::PARAM_STR);
             $update->bindValue(':id', $this->getId(), PDO::PARAM_INT);
+            $update->execute();
 
-            return ($update->execute()) ? ['valid' => true] : ['valid' => false];
+            $id = ['id' => $this->getId()];
+            $this->success($id);
         } catch (PDOexception $e) {
-            return ['valid' => false, 'error' => $e->getMessage()];
+            $this->error($e->getMessage());
+        } finally {
+            $update = null;
+            Database::disconnect();
+            return $this->send();
         }
     }
 
-    public function delete()
+    public function delete(): array
     {
-        return ($this->deleteById($this->getId())) ? ['valid' => true] : ['valid' => false];
+        return $this->deleteById($this->getId());
     }
 
     // OTHERS METHODS

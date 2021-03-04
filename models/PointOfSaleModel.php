@@ -18,39 +18,39 @@ class PointOfSaleModel extends BaseModel
 
     public function __construct()
     {
-          $this->table = 'points_of_sales';
-     }
+        $this->table = 'points_of_sales';
+    }
 
     // GET & SET
 
-    public function getId()
+    public function getId(): int
     {
         return $this->id;
     }
 
-    public function setId(int $id)
+    public function setId($id): void
     {
-        $this->id = $id;
+        $this->id = $this->validate($id)->require()->int();
     }
 
-    public function getIdCompany()
+    public function getIdCompany(): int
     {
         return $this->idCompany;
     }
 
-    public function setIdCompany(string $idCompany)
+    public function setIdCompany($idCompany): void
     {
-        $this->idCompany = $idCompany;
+        $this->idCompany = $this->validate($idCompany)->require()->int();
     }
 
-    public function getIdStatus()
+    public function getIdStatus(): int
     {
         return $this->idStatus;
     }
 
-    public function setIdStatus(string $status)
+    public function setIdStatus($status): void
     {
-        $this->idStatus = $status;
+        $this->idStatus = $this->validate($status)->require()->int();
     }
 
     public function getName()
@@ -58,9 +58,9 @@ class PointOfSaleModel extends BaseModel
         return $this->name;
     }
 
-    public function setName(string $name)
+    public function setName(string $name): void
     {
-        $this->name = $name;
+        $this->name = $this->validate($name)->string();
     }
 
     public function getCompanyCode()
@@ -68,9 +68,9 @@ class PointOfSaleModel extends BaseModel
         return $this->companyCode;
     }
 
-    public function setCompanyCode(?string $companyCode)
+    public function setCompanyCode(?string $companyCode): void
     {
-        $this->companyCode = $companyCode;
+        $this->companyCode = $this->validate($companyCode)->string();
     }
 
     public function getIdCountry()
@@ -78,9 +78,9 @@ class PointOfSaleModel extends BaseModel
         return $this->idCountry;
     }
 
-    public function setIdCountry(?int $idCountry)
+    public function setIdCountry(?int $idCountry): void
     {
-        $this->idCountry = $idCountry;
+        $this->idCountry = $this->validate($idCountry)->int();
     }
 
     public function getProvince()
@@ -88,9 +88,9 @@ class PointOfSaleModel extends BaseModel
         return $this->province;
     }
 
-    public function setProvince(?string $province)
+    public function setProvince(?string $province): void
     {
-        $this->province = $province;
+        $this->province = $this->validate($province)->string();
     }
 
     public function getLocality()
@@ -98,9 +98,9 @@ class PointOfSaleModel extends BaseModel
         return $this->locality;
     }
 
-    public function setLocality(?string $locality)
+    public function setLocality(?string $locality): void
     {
-        $this->locality = $locality;
+        $this->locality = $this->validate($locality)->string();
     }
 
     public function getPostalCode()
@@ -108,9 +108,9 @@ class PointOfSaleModel extends BaseModel
         return $this->postalCode;
     }
 
-    public function setPostalCode(?int $postalCode)
+    public function setPostalCode(?int $postalCode): void
     {
-        $this->postalCode = $postalCode;
+        $this->postalCode = $this->validate($postalCode)->int();
     }
 
     public function getAddress()
@@ -118,9 +118,9 @@ class PointOfSaleModel extends BaseModel
         return $this->address;
     }
 
-    public function setAddress(?string $address)
+    public function setAddress(?string $address): void
     {
-        $this->address = $address;
+        $this->address = $this->validate($address)->string();
     }
 
     /**
@@ -128,7 +128,7 @@ class PointOfSaleModel extends BaseModel
      *  PRIVATES METHODS
      */
 
-    private function queryPointOfSale()
+    private function queryPointOfSale(): array
     {
 
         require_once 'libs/QueryBuild.php';
@@ -139,7 +139,8 @@ class PointOfSaleModel extends BaseModel
         $this->table.created, 
         $this->table.company_code, 
         $this->table._id_status, 
-        $this->table._id_company, pto_status.status, companies.business_name, companies.cif");
+        $this->table._id_company, 
+        pto_status.status, companies.business_name, companies.cif");
 
         $build->setFrom($this->table);
 
@@ -157,11 +158,11 @@ class PointOfSaleModel extends BaseModel
 
     //  PUBLICS METHODS
 
-    public function create()
+    public function create(): array
     {
         try {
 
-            $new = $this->connect()->prepare(
+            $new = Database::connect()->prepare(
                 "INSERT 
                 INTO $this->table 
                 (_id_company, 
@@ -194,31 +195,34 @@ class PointOfSaleModel extends BaseModel
             $new->bindValue(':postalCode', $this->getPostalCode(), PDO::PARAM_INT);
             $new->bindValue(':address', $this->getAddress(), PDO::PARAM_STR);
 
-            if ($new->execute()) {
-                return 'Punto de venta registrado.';
-            } else {
-                return 'Hubo un error al registrar, intentalo mas tarde.';
-            }
+            $new->execute();
+
+            $id = ['id' => Database::connect()->lastInsertId()];
+            $this->success($id, 'Punto de venta registrado.');
         } catch (PDOexception $e) {
-            return $e->getMessage();
+            $this->status(500)->error($e->getMessage());
+        } finally {
+            $new = null;
+            Database::disconnect();
+            return $this->send();
         }
     }
 
-    public function read()
+    public function read(): array
     {
         return $this->getById($this->getId());
     }
 
-    public function readAll()
+    public function readAll(): array
     {
         return $this->getAllQuery($this->queryPointOfSale());
     }
 
-    public function update()
+    public function update(): array
     {
         try {
 
-            $update = $this->connect()->prepare(
+            $update = Database::connect()->prepare(
                 "UPDATE 
                 $this->table 
                 SET 
@@ -236,37 +240,37 @@ class PointOfSaleModel extends BaseModel
 
             $update->bindValue(':company', $this->getIdCompany(), PDO::PARAM_INT);
             $update->bindValue(':status', $this->getIdStatus(), PDO::PARAM_INT);
-
             $update->bindValue(':name', $this->getName(), PDO::PARAM_STR);
             $update->bindValue(':code', $this->getCompanyCode(), PDO::PARAM_STR);
-
             $update->bindValue(':country', $this->getIdCountry(), PDO::PARAM_INT);
             $update->bindValue(':province', $this->getProvince(), PDO::PARAM_STR);
             $update->bindValue(':locality', $this->getLocality(), PDO::PARAM_STR);
             $update->bindValue(':postal_code', $this->getPostalCode(), PDO::PARAM_INT);
             $update->bindValue(':address', $this->getAddress(), PDO::PARAM_STR);
-
             $update->bindValue(':id', $this->getId(), PDO::PARAM_INT);
+            $update->execute();
 
-            if ($update->execute()) {
-                header('Location: ' . URL_BASE . $_GET['controller'] . '/' . $_GET['action'] . '/' . $_GET['id'] . '?status=1');
-            } else {
-                header('Location: ' . URL_BASE . $_GET['controller'] . '/' . $_GET['action'] . '/' . $_GET['id'] . '?status=0');
-            }
+            $id = ['id' => $this->getId()];
+            $this->success($id);
         } catch (PDOexception $e) {
-            return $e->getMessage();
+            $this->status(500)->error($e->getMessage());
+        } finally {
+            $update = null;
+            Database::disconnect();
+            return $this->send();
         }
     }
 
-    public function delete()
+    public function delete(): array
     {
+        return $this->deleteById($this->getId());
     }
 
-    public function getDetails()
+    public function getDetails(): array
     {
         try {
 
-            $get = $this->connect()->prepare(
+            $get = Database::connect()->prepare(
                 "SELECT 
                 $this->table.name,
                 $this->table.company_code,
@@ -291,59 +295,57 @@ class PointOfSaleModel extends BaseModel
                 LEFT JOIN
                 countries
                 ON $this->table._id_country = countries._id
-                WHERE $this->table._id = :id
-            "
+                WHERE $this->table._id = :id"
             );
 
             $get->bindValue(':id', $this->getId(), PDO::PARAM_INT);
             $get->execute();
             $result = $get->fetch(PDO::FETCH_ASSOC);
-
-            $get = null;
-
-            return $result;
+            $this->success($result);
         } catch (PDOexception $e) {
-            return $e->getMessage();
+            $this->status(500)->error($e->getMessage());
+        } finally {
+            $get = null;
+            Database::disconnect();
+            return $this->send();
         }
     }
 
     // OTHERS METHODS
 
-    public function paginations()
+    public function paginations(): array
     {
         return $this->pagination('paginations', $this->queryPointOfSale());
     }
 
-    public function getCompanies()
+    public function getCompanies(): array
     {
         try {
-
-            $get = $this->connect()->prepare(
+            $get = Database::connect()->prepare(
                 "SELECT _id, business_name
                 FROM companies
                 WHERE _id_status = :status"
             );
 
             $get->bindValue(':status', 1, PDO::PARAM_INT);
-
             $get->execute();
-
             $result = $get->fetchAll(PDO::FETCH_ASSOC);
-
-            $get = null;
-
-            return $result;
+            $this->success($result);
         } catch (PDOexception $e) {
-            return $e->getMessage();
+            $this->status(500)->fail($e->getMessage());
+        } finally {
+            $get = null;
+            Database::disconnect();
+            return $this->send();
         }
     }
 
-    public function getStatus()
+    public function getStatus(): array
     {
         return $this->getAllOtherTable('pto_status');
     }
 
-    public function getCountries()
+    public function getCountries(): array
     {
         return $this->getAllOtherTable('countries');
     }

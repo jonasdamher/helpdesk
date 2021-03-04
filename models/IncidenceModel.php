@@ -1,8 +1,9 @@
-<?php 
+<?php
 
 declare(strict_types=1);
 
-class IncidenceModel extends BaseModel {
+class IncidenceModel extends BaseModel
+{
 
     private int $id;
     private string $subject;
@@ -13,81 +14,99 @@ class IncidenceModel extends BaseModel {
     private int $idStatus;
     private int $idType;
 
-    public function __construct() {
-         $this->table = 'incidences';
-     }
+    public function __construct()
+    {
+        $this->table = 'incidences';
+    }
 
     // GET & SET
 
-    public function getId() {
+    public function getId()
+    {
         return $this->id;
     }
 
-    public function setId(int $id) {
-        $this->id = $id;
+    public function setId($id)
+    {
+        $this->id = $this->validate($id)->require()->int();
     }
 
-    public function getSubject() {
+    public function getSubject()
+    {
         return $this->subject;
     }
 
-    public function setSubject(string $subject) {
+    public function setSubject(string $subject)
+    {
         $this->subject = $subject;
     }
 
-    public function getDescription() {
+    public function getDescription()
+    {
         return $this->description;
     }
 
-    public function setDescription(?string $description) {
+    public function setDescription(?string $description)
+    {
         $this->description = $description;
     }
 
-    public function getIdPtoOfSales() {
+    public function getIdPtoOfSales()
+    {
         return $this->idPtoOfSales;
     }
 
-    public function setIdPtoOfSales(int $idPtoOfSales) {
-        $this->idPtoOfSales = $idPtoOfSales;
+    public function setIdPtoOfSales($idPtoOfSales)
+    {
+        $this->idPtoOfSales = $this->validate($idPtoOfSales)->require()->int();
     }
-    public function getIdAttended() {
+    public function getIdAttended()
+    {
         return $this->idAttended;
     }
 
-    public function setIdAttended(?int $idAttended) {
-        $this->idAttended = $idAttended;
+    public function setIdAttended($idAttended)
+    {
+        $this->idAttended = $this->validate($idAttended)->require()->int();
     }
 
-    public function getIdPriority() {
+    public function getIdPriority()
+    {
         return $this->idPriority;
     }
 
-    public function setIdPriority(int $idPriority) {
+    public function setIdPriority(int $idPriority)
+    {
         $this->idPriority = $idPriority;
     }
 
-    public function getIdStatus() {
+    public function getIdStatus()
+    {
         return $this->idStatus;
     }
 
-    public function setIdStatus(int $idStatus) {
+    public function setIdStatus(int $idStatus)
+    {
         $this->idStatus = $idStatus;
     }
 
-    public function getIdType() {
+    public function getIdType()
+    {
         return $this->idType;
     }
 
-    public function setIdType(int $idType) {
-        $this->idType = $idType;
+    public function setIdType($idType)
+    {
+        $this->idType = $this->validate($idType)->require()->int();
     }
 
     /**
      *  METHODS
      *  PRIVATES METHODS
-    */ 
+     */
 
-    private function queryIncidence() {
+    private function queryIncidence()
+    {
 
         require_once 'libs/QueryBuild.php';
         $build = new QueryBuild();
@@ -119,28 +138,30 @@ class IncidenceModel extends BaseModel {
         inc_status
         ON $this->table._id_status = inc_status._id");
 
-        if(!is_null($this->getIdAttended() ) ) {
+        if (!is_null($this->getIdAttended())) {
             $build->setWhere("$this->table._id_attended = :id AND $this->table._id_status != 3");
             $build->setById($this->getIdAttended());
         }
 
         $build->setSearch(
             "$this->table.subject LIKE :search OR points_of_sales.name LIKE :search OR users.name 
-            LIKE :search OR inc_priorities.priority LIKE :search OR inc_status.status LIKE :search");
-    
+            LIKE :search OR inc_priorities.priority LIKE :search OR inc_status.status LIKE :search"
+        );
+
         return $build->query();
     }
 
     //  PUBLICS METHODS
 
-    public function create() {
+    public function create()
+    {
         try {
 
             $new = Database::connect()->prepare(
                 "INSERT INTO $this->table 
                 (subject, description, _id_pto_of_sales, _id_user_created, _id_attended, _id_priority, _id_status, _id_type) 
-                VALUES (:subject, :description, :idPto, :idUser, :idUserAttended, :idPriority, :idStatus, :idType)");
-
+                VALUES (:subject, :description, :idPto, :idUser, :idUserAttended, :idPriority, :idStatus, :idType)"
+            );
             $new->bindValue(':subject', $this->getSubject(), PDO::PARAM_STR);
             $new->bindValue(':description', $this->getDescription(), PDO::PARAM_STR);
             $new->bindValue(':idPto', $this->getIdPtoOfSales(), PDO::PARAM_INT);
@@ -149,66 +170,73 @@ class IncidenceModel extends BaseModel {
             $new->bindValue(':idPriority', $this->getIdPriority(), PDO::PARAM_INT);
             $new->bindValue(':idStatus', $this->getIdStatus(), PDO::PARAM_INT);
             $new->bindValue(':idType', $this->getIdType(), PDO::PARAM_INT);
-            
-            if($new->execute() ) {
-                return 'Incidencia registrada.';
-            }else {
-                return 'Hubo un error al intentar registrar, intentelo mas tarde.';
-            }
+            $new->execute();
 
-        }catch(PDOexception $e) {
-            return $e->getMessage();
+            $result = ['id' => Database::connect()->lastInsertId()];
+            $this->success($result, 'Incidencia registrada.');
+        } catch (PDOexception $e) {
+            $this->status(500)->error($e->getMessage());
+        } finally {
+            $new = null;
+            Database::disconnect();
+            return $this->send();
         }
     }
 
-    public function read() {
-        return $this->getById($this->getId() );
-    }
- 
-    public function readAll() {
-        return $this->getAllQuery($this->queryIncidence() );
+    public function read()
+    {
+        return $this->getById($this->getId());
     }
 
-    public function verifyArticlesBorrowed() {
+    public function readAll()
+    {
+        return $this->getAllQuery($this->queryIncidence());
+    }
+
+    public function verifyArticlesBorrowed()
+    {
         try {
 
             $get = Database::connect()->prepare(
-                "SELECT
-                articles_borrowed_point_of_sales
-                FROM
+                "SELECT *
+                FROM articles_borrowed_point_of_sales
                 INNER JOIN
                 articles_only
                 ON articles_borrowed_point_of_sales._id_article_only = articles_only._id
                 WHERE articles_borrowed_point_of_sales._id_incidence = :id 
-                AND articles_only._id_borrowed_status = 2");
-
+                AND articles_only._id_borrowed_status = 2"
+            );
             $get->bindValue(':id', $this->getId(), PDO::PARAM_INT);
-
             $get->execute();
 
-            return $get->fetchAll(PDO::FETCH_ASSOC);
-            
-        }catch(PDOexception $e) {
-            return ['valid'=> false, 'error' => $e->getMessage()];
+            $result = $get->fetchAll(PDO::FETCH_ASSOC);
+            $this->success($result);
+        } catch (Exception $e) {
+            $this->fail($e->getMessage());
+        } catch (PDOexception $e) {
+            $this->status(500)->error($e->getMessage());
+        } finally {
+            $get = null;
+            Database::disconnect();
+            return $this->send();
         }
     }
 
-    public function update() {
+    public function update()
+    {
         try {
 
             $incidence = $this->read();
             $dateSql = '';
 
-            if($this->getIdStatus() == 3 && $incidence['_id_status'] != 3){
+            if ($this->getIdStatus() == 3 && $incidence['result']['_id_status'] != 3) {
                 $date = date("Y-m-d H:i:s");
                 $dateSql = ', finish_date = :date';
 
                 $notArticleBorrowed = $this->verifyArticlesBorrowed();
-
-                if($notArticleBorrowed){
-                    return 'No se puede finalizar hasta que todos lo artículos en préstamo sean devueltos.';
+                if ($notArticleBorrowed['valid']) {
+                    throw new Exception('No se puede finalizar hasta que todos lo artículos en préstamo sean devueltos.');
                 }
-
             }
 
             $update = Database::connect()->prepare(
@@ -221,7 +249,8 @@ class IncidenceModel extends BaseModel {
                 _id_status = :idStatus,
                 _id_type = :idType
                 $dateSql
-                WHERE _id = :id");
+                WHERE _id = :id"
+            );
 
             $update->bindValue(':subject', $this->getSubject(), PDO::PARAM_STR);
             $update->bindValue(':description', $this->getDescription(), PDO::PARAM_STR);
@@ -230,23 +259,31 @@ class IncidenceModel extends BaseModel {
             $update->bindValue(':idPriority', $this->getIdPriority(), PDO::PARAM_INT);
             $update->bindValue(':idStatus', $this->getIdStatus(), PDO::PARAM_INT);
             $update->bindValue(':idType', $this->getIdType(), PDO::PARAM_INT);
-            if($this->getIdStatus() == 3 && $incidence['_id_status'] != 3){
+
+            if ($this->getIdStatus() == 3 && $incidence['_id_status'] != 3) {
                 $update->bindValue(':date', $date, PDO::PARAM_STR);
             }
-            $update->bindValue(':id', $this->getId(), PDO::PARAM_INT);
 
-            if($update->execute() ) {
-                header('Location: '.URL_BASE.$_GET['controller'].'/'.$_GET['action'].'/'.$_GET['id'].'?status=1');
-            }else {
-                header('Location: '.URL_BASE.$_GET['controller'].'/'.$_GET['action'].'/'.$_GET['id'].'?status=0');
-            }
-        }catch(PDOexception $e) {
-            return $e->getMessage();
+            $update->bindValue(':id', $this->getId(), PDO::PARAM_INT);
+            $update->execute();
+
+            $newData = $this->read();
+
+            $this->success($newData, 'Incidencia actualizado.');
+        } catch (Exception $e) {
+            $this->status(404)->fail($e->getMessage());
+        } catch (PDOexception $e) {
+            $this->status(500)->error($e->getMessage());
+        } finally {
+            $update = null;
+            Database::disconnect();
+            return $this->send();
         }
     }
 
-    public function getDetails() {
-        try{
+    public function getDetails()
+    {
+        try {
 
             $get = Database::connect()->prepare(
                 "SELECT 
@@ -278,48 +315,58 @@ class IncidenceModel extends BaseModel {
                 ON $this->table._id_status = inc_status._id
                 INNER JOIN inc_types_incidences
                 ON $this->table._id_type = inc_types_incidences._id
-                WHERE $this->table._id = :id");
-
+                WHERE $this->table._id = :id"
+            );
             $get->bindValue(':id', $this->getId(), PDO::PARAM_INT);
             $get->execute();
+            if (!$get->rowCount()) {
+                throw new Exception('Incidencia no encontrada.');
+            }
+
             $result = $get->fetch(PDO::FETCH_ASSOC);
-            
+            $this->success($result);
+        } catch (Exception $e) {
+            $this->status(404)->fail($e->getMessage());
+        } catch (PDOexception $e) {
+            $this->status(500)->error($e->getMessage());
+        } finally {
             $get = null;
-
-            return $result;
-
-        }catch(PDOexception $e) {
-            return $e->getMessage();
+            Database::disconnect();
+            return $this->send();
         }
     }
 
     // OTHERS METHODS
 
-    public function paginations() {
-        return $this->pagination('paginations', $this->queryIncidence() );
+    public function paginations()
+    {
+        return $this->pagination('paginations', $this->queryIncidence());
     }
 
-    public function getPointOfSales() {
+    public function getPointOfSales()
+    {
         return $this->getAllOtherTable('points_of_sales');
     }
 
-    public function getUsers() {
+    public function getUsers()
+    {
         return $this->getAllOtherTable('users');
     }
 
-    public function getPriorities() {
+    public function getPriorities()
+    {
         return $this->getAllOtherTable('inc_priorities');
     }
 
-    public function getStatus() {
+    public function getStatus()
+    {
         $family = $this->getAllOtherTable('inc_status_family');
         $status = $this->getAllOtherTable('inc_status');
         return ['family' => $family, 'status' => $status];
     }
 
-    public function getType() {
+    public function getType()
+    {
         return $this->getAllOtherTable('inc_types_incidences');
     }
 }
-
-?>

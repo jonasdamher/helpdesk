@@ -1,8 +1,9 @@
-<?php 
+<?php
 
 declare(strict_types=1);
 
-class ArticleModel extends BaseModel {
+class ArticleModel extends BaseModel
+{
 
     private int $id;
     private int $idArticle;
@@ -12,75 +13,90 @@ class ArticleModel extends BaseModel {
     private ?string $code;
     private ?string $observations;
 
-    public function __construct() {
-         $this->table = 'articles_only';
-     }
+    public function __construct()
+    {
+        $this->table = 'articles_only';
+    }
 
     // GET & SET
 
-    public function getId() {
+    public function getId(): int
+    {
         return $this->id;
     }
 
-    public function setId(int $id) {
-        $this->id = $id;
+    public function setId(int $id): void
+    {
+        $this->id = $this->validate($id)->require()->int();
     }
 
-    public function getIdStatus() {
+    public function getIdStatus(): int
+    {
         return $this->idStatus;
-    }   
-
-    public function setIdStatus(int $idStatus) {
-        $this->idStatus = $idStatus;
     }
 
-    public function getSerial() {
+    public function setIdStatus(int $idStatus): void
+    {
+        $this->idStatus = $this->validate($idStatus)->require()->int();
+    }
+
+    public function getSerial(): string
+    {
         return $this->serial;
-    }   
-
-    public function setSerial(?string $serial) {
-        $this->serial = $serial;
     }
 
-    public function getCode() {
+    public function setSerial(?string $serial): void
+    {
+        $this->serial = $this->validate($serial)->string();
+    }
+
+    public function getCode(): string
+    {
         return $this->code;
-    }   
-
-    public function setCode(?string $code) {
-        $this->code = $code;
     }
-    
-    public function getIdArticle() {
+
+    public function setCode(?string $code): void
+    {
+        $this->code = $this->validate($code)->string();
+    }
+
+    public function getIdArticle(): int
+    {
         return $this->idArticle;
-    }   
-
-    public function setIdArticle(int $idArticle) {
-        $this->idArticle = $idArticle;
     }
 
-    public function getIdBorrowed() {
+    public function setIdArticle($idArticle): void
+    {
+        $this->idArticle = $this->validate($idArticle)->require()->int();
+    }
+
+    public function getIdBorrowed(): int
+    {
         return $this->idBorrowed;
-    }   
+    }
 
-    public function setIdBorrowed(int $idBorrowed) {
-        $this->idBorrowed = $idBorrowed;
-    }   
+    public function setIdBorrowed($idBorrowed): void
+    {
+        $this->idBorrowed = $this->validate($idBorrowed)->require()->int();
+    }
 
-    public function getObservations() {
+    public function getObservations(): string
+    {
         return $this->observations;
-    }   
+    }
 
-    public function setObservations(?string $observations) {
-        $this->observations = $observations;
-    }   
+    public function setObservations(?string $observations): void
+    {
+        $this->observations = $this->validate($observations)->string();
+    }
 
-   /**
+    /**
      *  METHODS
      *  PRIVATES METHODS
-    */ 
-        
-    private function queryArticlesOnly() {
- 
+     */
+
+    private function queryArticlesOnly()
+    {
         require_once 'libs/QueryBuild.php';
         $build = new QueryBuild();
 
@@ -97,32 +113,20 @@ class ArticleModel extends BaseModel {
         LEFT JOIN points_of_sales ON articles_borrowed_point_of_sales._id_pto = points_of_sales._id
         LEFT JOIN incidences ON articles_borrowed_point_of_sales._id_incidence = incidences._id AND incidences._id_status != 3");
         $build->setWhere("$this->table._id_article = :id ");
-        $build->setById($this->getIdArticle() );
+        $build->setById($this->getIdArticle());
 
         return $build->query();
     }
 
     // PUBLICS METHODS
 
-    public function create() {
+    public function create()
+    {
         try {
-
             $new = Database::connect()->prepare(
-                "INSERT 
-                INTO $this->table 
-                (
-                _id_article,
-                serial,
-                code,
-                observations,
-                _id_status) 
-                VALUES (
-                :idArticle,
-                :serial,
-                :code,
-                :observations,
-                :idStatus        
-                )"
+                "INSERT INTO $this->table 
+                (_id_article,serial,code,observations,_id_status) 
+                VALUES (:idArticle,:serial,:code,:observations,:idStatus)"
             );
 
             $new->bindValue(':idArticle', $this->getIdArticle(), PDO::PARAM_INT);
@@ -130,17 +134,22 @@ class ArticleModel extends BaseModel {
             $new->bindValue(':code', $this->getCode(), PDO::PARAM_STR);
             $new->bindValue(':observations', $this->getObservations(), PDO::PARAM_STR);
             $new->bindValue(':idStatus', $this->getIdStatus(), PDO::PARAM_INT);
+            $new->execute();
 
-            return ($new->execute() ) ? ['valid' => true, 'id' => Database::connect()->lastInsertId()] : ['valid' => false];
-            
-        }catch(PDOexception $e) {
-            return ['valid'=> false, 'error' => $e->getMessage()];
+            $id = ['id' => Database::connect()->lastInsertId()];
+            $this->success($id);
+        } catch (PDOexception $e) {
+            $this->error($e->getMessage());
+        } finally {
+            $new = null;
+            Database::disconnect();
+            return $this->send();
         }
     }
 
-    public function read() {
+    public function read()
+    {
         try {
-
             $get = Database::connect()->prepare(
                 "SELECT
                 $this->table._id,
@@ -160,31 +169,43 @@ class ArticleModel extends BaseModel {
                 INNER JOIN
                 art_borrowed_status
                 ON $this->table._id_borrowed_status = art_borrowed_status._id
-                WHERE $this->table._id = :id");
+                WHERE $this->table._id = :id"
+            );
 
             $get->bindValue(':id', $this->getId(), PDO::PARAM_INT);
-
-            return ($get->execute() ) ? ['valid' => true, 'read' => $get->fetch(PDO::FETCH_ASSOC)] : ['valid' => false];
-            
-        }catch(PDOexception $e) {
-            return ['valid'=> false, 'error' => $e->getMessage()];
+            $get->execute();
+            if (!$get->rowCount()) {
+                throw new Exception('Usuario no encontrado.');
+            }
+             $result = $get->fetch(PDO::FETCH_ASSOC);
+            $this->success($result);
+        } catch (Exception $e) {
+            $this->status(404)->fail($e->getMessage());
+        } catch (PDOexception $e) {
+            $this->status(500)->error($e->getMessage());
+        } finally {
+            $get = null;
+            Database::disconnect();
+            return $this->send();
         }
     }
 
-    public function readAll() {
-        return $this->getAllQuery($this->queryArticlesOnly() );
+    public function readAll()
+    {
+        return $this->getAllQuery($this->queryArticlesOnly());
     }
 
-    public function update() {
+    public function update()
+    {
         try {
-
             $update = Database::connect()->prepare(
                 "UPDATE $this->table SET
                 serial = :serial, 
                 code = :code, 
                 observations = :observations,
                 _id_status = :idStatus
-                WHERE _id = :id");
+                WHERE _id = :id"
+            );
 
             $update->bindValue(':serial', $this->getSerial(), PDO::PARAM_STR);
             $update->bindValue(':code', $this->getCode(), PDO::PARAM_STR);
@@ -193,37 +214,55 @@ class ArticleModel extends BaseModel {
 
             $update->bindValue(':id', $this->getId(), PDO::PARAM_INT);
 
-            return ($update->execute() ) ? ['valid' => true] : ['valid' => false];
+            $update->execute();
 
-        }catch(PDOexception $e) {
-            return ['valid'=> false, 'error' => $e->getMessage()];
+            $id = ['id' => $this->getId()];
+            $this->success($id);
+        } catch (PDOexception $e) {
+            $this->error($e->getMessage());
+        } finally {
+            $update = null;
+            Database::disconnect();
+            return $this->send();
         }
     }
 
-    public function delete() {
+    public function delete()
+    {
+        try {
+            $article = $this->getById($this->getId());
+            if ($article['result']['_id_borrowed_status'] == 2) {
+                throw new Exception('El artículo está en prestamo en una incidencia.');
+            }
 
-        $article = $this->getById($this->getId() );
+            $delete = $this->deleteById($this->getId());
+            if (!$delete['valid']) {
+                throw new Exception('Hubo un error al intentar eliminar el artículo.');
+            }
 
-        if($article['_id_borrowed_status'] == 2 ) {
-            return ['valid' => false, 'error' => 'El artículo está en prestamo en una incidencia.'];
+            $this->success($delete['result']);
+        } catch (Exception $e) {
+            $this->fail($e->getMessage());
+        } finally {
+            return $this->send();
         }
-
-        return ($this->deleteById($this->getId() )) ? ['valid' => true] : ['valid' => false, 'error' => 'Hubo un error al intentar eliminar el artículo.'];
     }
 
     // OTHERS METHODS
 
-    public function paginations() {
-        return $this->pagination('paginations', $this->queryArticlesOnly() );
+    public function paginations()
+    {
+        return $this->pagination('paginations', $this->queryArticlesOnly());
     }
 
-    public function getStatus() {
+    public function getStatus()
+    {
         return $this->getAllOtherTable('art_status');
     }
 
-    public function getNotBorrowed() {
+    public function getNotBorrowed()
+    {
         try {
-
             $get = Database::connect()->prepare(
                 "SELECT
                 $this->table._id,
@@ -234,60 +273,66 @@ class ArticleModel extends BaseModel {
                 INNER JOIN
                 articles
                 ON $this->table._id_article = articles._id
-                WHERE $this->table._id_status = :idStatus");
-
+                WHERE $this->table._id_status = :idStatus"
+            );
             $get->bindValue(':idStatus', 1, PDO::PARAM_INT);
-
             $get->execute();
-            $result = $get->fetchAll(PDO::FETCH_ASSOC);
-            $get = null;
 
-            return $result;
-        }catch(PDOexception $e) {
-            return $e->getMessage();
+            $result = $get->fetchAll(PDO::FETCH_ASSOC);
+
+            $this->success($result, 'Usuario actualizado.');
+        } catch (PDOexception $e) {
+            $this->status(500)->error($e->getMessage());
+        } finally {
+            $get = null;
+            Database::disconnect();
+            return $this->send();
         }
     }
 
-    public function updateBorrowed() {
+    public function updateBorrowed()
+    {
         try {
-
-            $update = Database::connect()->prepare(
-                "UPDATE $this->table SET
-                _id_borrowed_status = :idBorrowed
-                WHERE $this->table._id = :id");
-
+            $update = Database::connect()->prepare("UPDATE $this->table SET _id_borrowed_status = :idBorrowed WHERE $this->table._id = :id");
             $update->bindValue(':idBorrowed', $this->getIdBorrowed(), PDO::PARAM_INT);
             $update->bindValue(':id', $this->getId(), PDO::PARAM_INT);
-            
-            return ($update->execute() ) ? ['valid' => true] : ['valid' => false];
-        }catch(PDOexception $e) {
-            return ['valid' => false, 'error' =>  $e->getMessage()];
+            $update->execute();
+
+            $result = ['id' => $this->getId()];
+            $this->success($result);
+        } catch (PDOexception $e) {
+            $this->status(500)->error($e->getMessage());
+        } finally {
+            $update = null;
+            Database::disconnect();
+            return $this->send();
         }
     }
-    public function totalBorrowed() {
-        try {
 
+    public function totalBorrowed()
+    {
+        try {
             $get = Database::connect()->prepare(
                 "SELECT art_borrowed_status.status, COUNT(*) as total
                 FROM $this->table
                 INNER JOIN art_borrowed_status
                 ON $this->table._id_borrowed_status = art_borrowed_status._id 
                 WHERE $this->table._id_article = :id
-                GROUP BY art_borrowed_status.status");
+                GROUP BY art_borrowed_status.status"
+            );
 
             $get->bindValue(':id', $this->getIdArticle(), PDO::PARAM_INT);
             $get->execute();
-            
-            $result = $get->fetchAll(PDO::FETCH_ASSOC);
-            
-            $get = null;
-            
-            return $result;
 
-        }catch(PDOexception $e) {
-            return $e->getMessage();
+            $result = $get->fetchAll(PDO::FETCH_ASSOC);
+
+            $this->success($result);
+        } catch (PDOexception $e) {
+            $this->status(500)->error($e->getMessage());
+        } finally {
+            $get = null;
+            Database::disconnect();
+            return $this->send();
         }
     }
 }
-
-?>

@@ -136,45 +136,45 @@ class GeneralArticleModel extends BaseModel
     public function create()
     {
         try {
-
             $existBarcode = $this->getBy('barcode', $this->getBarcode());
 
-            if ($existBarcode) {
-                return 'El código de barras "' . $this->getBarcode() . '" ya está registrado.';
+            if ($existBarcode['valid']) {
+                throw new Exception('El código de barras "' . $this->getBarcode() . '" ya está registrado.');
             }
-
+            /*
             $imageUpload = $this->Image('articles', $this->getImage());
-
             if ($imageUpload['valid']) {
-
-                $new = Database::connect()->prepare(
-                    "INSERT INTO $this->table ( 
-                        name, description, barcode, cost, pvp, _id_provider, _id_type, image
-                    )
-                    VALUES (
-                    :name, :description, :barcode, :cost, :pvp, :idProvider, :idType, :image
-                    )"
-                );
-
-                $new->bindValue(':name', $this->getName(), PDO::PARAM_STR);
-                $new->bindValue(':description', $this->getDescription(), PDO::PARAM_STR);
-                $new->bindValue(':barcode', $this->getBarcode(), PDO::PARAM_STR);
-                $new->bindValue(':cost', $this->getCost(), PDO::PARAM_STR);
-                $new->bindValue(':pvp', $this->getPvp(), PDO::PARAM_STR);
-                $new->bindValue(':idProvider', $this->getIdProvider(), PDO::PARAM_INT);
-                $new->bindValue(':idType', $this->getIdType(), PDO::PARAM_INT);
-                $new->bindValue(':image', $imageUpload['filename'], PDO::PARAM_STR);
-
-                if ($new->execute()) {
-                    return 'Artículo registrado.';
-                } else {
-                    return 'Hubo un error al intentar registrar, intentelo mas tarde.';
-                }
-            } else {
-                return $imageUpload['errors'];
             }
+            */
+            $new = Database::connect()->prepare(
+                "INSERT INTO $this->table ( 
+            name, description, barcode, cost, pvp, _id_provider, _id_type, --image
+            )
+            VALUES (
+            :name, :description, :barcode, :cost, :pvp, :idProvider, :idType,-- :image
+            )"
+            );
+            $new->bindValue(':name', $this->getName(), PDO::PARAM_STR);
+            $new->bindValue(':description', $this->getDescription(), PDO::PARAM_STR);
+            $new->bindValue(':barcode', $this->getBarcode(), PDO::PARAM_STR);
+            $new->bindValue(':cost', $this->getCost(), PDO::PARAM_STR);
+            $new->bindValue(':pvp', $this->getPvp(), PDO::PARAM_STR);
+            $new->bindValue(':idProvider', $this->getIdProvider(), PDO::PARAM_INT);
+            $new->bindValue(':idType', $this->getIdType(), PDO::PARAM_INT);
+            // $new->bindValue(':image', $imageUpload['filename'], PDO::PARAM_STR);
+
+            $new->execute();
+
+            $id = ['id' => Database::connect()->lastInsertId()];
+            $this->success($id, 'Artículo registrado.');
+        } catch (Exception $e) {
+            $this->fail($e->getMessage());
         } catch (PDOexception $e) {
-            return $e->getMessage();
+            $this->status(500)->error($e->getMessage());
+        } finally {
+            $new = null;
+            Database::disconnect();
+            return $this->send();
         }
     }
 
@@ -191,21 +191,20 @@ class GeneralArticleModel extends BaseModel
     public function update()
     {
         try {
-
             $existBarcode = $this->getBy('barcode', $this->getBarcode());
 
-            if ($existBarcode && $existBarcode['_id'] != $this->getId()) {
-                return 'El código de barras "' . $this->getBarcode() . '" ya está registrado.';
+            if ($existBarcode['valid'] && $existBarcode['result']['_id'] != $this->getId()) {
+                throw new Exception('El código de barras "' . $this->getBarcode() . '" ya está registrado.');
             }
 
-            $article = $this->read();
-            $imageUpload = $this->Image('articles', ['CurrentimageName' => $article['image'], 'updateImage' => $this->getImage()], 'update');
-
+            // $article = $this->read();
+            // $imageUpload = $this->Image('articles', ['CurrentimageName' => $article['image'], 'updateImage' => $this->getImage()], 'update');
+            /*
             if ($imageUpload['valid']) {
                 $image = !is_null($imageUpload['filename']) ? ', image = :image' : '';
-
-                $update = Database::connect()->prepare(
-                    "UPDATE $this->table SET
+            }*/
+            $update = Database::connect()->prepare(
+                "UPDATE $this->table SET
                     name = :name,
                     description = :description,
                     barcode = :barcode, 
@@ -213,39 +212,33 @@ class GeneralArticleModel extends BaseModel
                     pvp = :pvp,
                     _id_provider = :idProvider,
                     _id_type = :idType
-                    $image
                     WHERE _id = :id"
-                );
+            );
+            $update->bindValue(':name', $this->getName(), PDO::PARAM_STR);
+            $update->bindValue(':description', $this->getDescription(), PDO::PARAM_STR);
+            $update->bindValue(':barcode', $this->getBarcode(), PDO::PARAM_STR);
+            $update->bindValue(':cost', $this->getCost(), PDO::PARAM_STR);
+            $update->bindValue(':pvp', $this->getPvp(), PDO::PARAM_STR);
+            $update->bindValue(':idProvider', $this->getIdProvider(), PDO::PARAM_INT);
+            $update->bindValue(':idType', $this->getIdType(), PDO::PARAM_INT);
+            /*
+            if (!is_null($imageUpload['filename'])) {
+                $update->bindValue(':image', $imageUpload['filename'], PDO::PARAM_STR);
+            }*/
+            $update->bindValue(':id', $this->getId(), PDO::PARAM_INT);
+            $update->execute();
 
-                $update->bindValue(':name', $this->getName(), PDO::PARAM_STR);
-                $update->bindValue(':description', $this->getDescription(), PDO::PARAM_STR);
-                $update->bindValue(':barcode', $this->getBarcode(), PDO::PARAM_STR);
-                $update->bindValue(':cost', $this->getCost(), PDO::PARAM_STR);
-                $update->bindValue(':pvp', $this->getPvp(), PDO::PARAM_STR);
-                $update->bindValue(':idProvider', $this->getIdProvider(), PDO::PARAM_INT);
-                $update->bindValue(':idType', $this->getIdType(), PDO::PARAM_INT);
-
-                if (!is_null($imageUpload['filename'])) {
-                    $update->bindValue(':image', $imageUpload['filename'], PDO::PARAM_STR);
-                }
-
-                $update->bindValue(':id', $this->getId(), PDO::PARAM_INT);
-
-                if ($update->execute()) {
-                    header('Location: ' . URL_BASE . $_GET['controller'] . '/' . $_GET['action'] . '/' . $_GET['id'] . '?status=1');
-                } else {
-                    header('Location: ' . URL_BASE . $_GET['controller'] . '/' . $_GET['action'] . '/' . $_GET['id'] . '?status=0');
-                }
-            } else {
-                return $imageUpload['errors'];
-            }
+            $id = ['id' => $this->getId()];
+            $this->success($id, 'Artículo registrado.');
+        } catch (Exception $e) {
+            $this->fail($e->getMessage());
         } catch (PDOexception $e) {
-            return $e->getMessage();
+            $this->status(500)->error($e->getMessage());
+        } finally {
+            $update = null;
+            Database::disconnect();
+            return $this->send();
         }
-    }
-
-    public function delete()
-    {
     }
 
     public function getDetails()
@@ -270,18 +263,25 @@ class GeneralArticleModel extends BaseModel
                 ON $this->table._id_provider = suppliers._id
                 INNER JOIN art_types
                 ON $this->table._id_type = art_types._id
-                WHERE $this->table._id = :id
-            "
+                WHERE $this->table._id = :id"
             );
-
             $get->bindValue(':id', $this->getId(), PDO::PARAM_INT);
             $get->execute();
-            $result = $get->fetch(PDO::FETCH_ASSOC);
 
-            $get = null;
-            return $result;
+            if (!$get->rowCount()) {
+                throw new Exception('Artículo no encontrado.');
+            }
+
+            $result = $get->fetch(PDO::FETCH_ASSOC);
+            $this->success($result);
+        } catch (Exception $e) {
+            $this->status(404)->fail($e->getMessage());
         } catch (PDOexception $e) {
-            return $e->getMessage();
+            $this->status(500)->error($e->getMessage());
+        } finally {
+            $get = null;
+            Database::disconnect();
+            return $this->send();
         }
     }
 
@@ -313,13 +313,17 @@ class GeneralArticleModel extends BaseModel
                 units = units + (1)
                 WHERE _id = :id"
             );
-
             $update->bindValue(':id', $this->getId(), PDO::PARAM_INT);
+            $update->execute();
 
-            return ($update->execute()) ? ['valid' => true] : ['valid' => false];
+            $result = ['id' => $this->getId()];
+            $this->success($result);
         } catch (PDOexception $e) {
-
-            return $e->getMessage();
+            $this->status(500)->error($e->getMessage());
+        } finally {
+            $update = null;
+            Database::disconnect();
+            return $this->send();
         }
     }
 
@@ -334,13 +338,17 @@ class GeneralArticleModel extends BaseModel
                 units = units - (1)
                 WHERE _id = :id"
             );
-
             $update->bindValue(':id', $this->getId(), PDO::PARAM_INT);
+            $update->execute();
 
-            return ($update->execute()) ? ['valid' => true] : ['valid' => false];
+            $result = ['id' => $this->getId()];
+            $this->success($result);
         } catch (PDOexception $e) {
-
-            return $e->getMessage();
+            $this->status(500)->error($e->getMessage());
+        } finally {
+            $update = null;
+            Database::disconnect();
+            return $this->send();
         }
     }
 }

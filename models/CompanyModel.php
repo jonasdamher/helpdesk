@@ -101,94 +101,72 @@ class CompanyModel extends BaseModel
     public function create()
     {
         try {
-
             $existCif = $this->getBy('cif', $this->getCif());
-
-            if (!($existCif)) {
-
-                $existBusinessName = $this->getBy('business_name', $this->getbusinessName());
-
-                if (!($existBusinessName)) {
-
-                    $userNew = Database::connect()->prepare(
-                        "INSERT 
-                        INTO $this->table 
-                        (tradename, 
-                        business_name, 
-                        cif, 
-                        _id_status) 
-                        VALUES (:tradename, :business, :cif, :idStatus)"
-                    );
-
-                    $userNew->bindValue(':tradename', $this->getTradename(), PDO::PARAM_STR);
-                    $userNew->bindValue(':business', $this->getbusinessName(), PDO::PARAM_STR);
-                    $userNew->bindValue(':cif', $this->getCif(), PDO::PARAM_STR);
-                    $userNew->bindValue(':idStatus', $this->getIdStatus(), PDO::PARAM_STR);
-
-                    if ($userNew->execute()) {
-                        return 'Empresa registrada.';
-                    } else {
-                        return 'Hubo un error al registrar la empresa, intentalo mas tarde';
-                    }
-                } else {
-                    return 'La razón social "' . $this->getbusinessName() . '" ya está registrada.';
-                }
-            } else {
-                return 'El cif "' . $this->getCif() . '" ya está registrado.';
+            if ($existCif['valid']) {
+                throw new Exception('El cif "' . $this->getCif() . '" ya está registrado.');
             }
-        } catch (PDOexception $e) {
 
-            return $e->getMessage();
+            $existBusinessName = $this->getBy('business_name', $this->getbusinessName());
+            if ($existBusinessName['valid']) {
+                throw new Exception('La razón social "' . $this->getbusinessName() . '" ya está registrada.');
+            }
+
+            $new = Database::connect()->prepare(
+                "INSERT INTO $this->table 
+                (tradename, business_name, cif, _id_status) 
+                VALUES (:tradename, :business, :cif, :idStatus)"
+            );
+            $new->bindValue(':tradename', $this->getTradename(), PDO::PARAM_STR);
+            $new->bindValue(':business', $this->getbusinessName(), PDO::PARAM_STR);
+            $new->bindValue(':cif', $this->getCif(), PDO::PARAM_STR);
+            $new->bindValue(':idStatus', $this->getIdStatus(), PDO::PARAM_STR);
+            $new->execute();
+
+            $result = ['id' => Database::connect()->lastInsertId()];
+            $this->success($result, 'Empresa registrado.');
+        } catch (Exception $e) {
+            $this->status(500)->fail($e->getMessage());
+        } catch (PDOexception $e) {
+            $this->status(500)->error($e->getMessage());
+        } finally {
+            $new = null;
+            Database::disconnect();
+            return $this->send();
         }
     }
 
     public function update()
     {
         try {
-
             $existCif = $this->getBy('cif', $this->getCif());
-
-            if (!($existCif && $existCif['_id'] != $this->getId())) {
-
-                $existBusinessName = $this->getBy('business_name', $this->getbusinessName());
-
-                if (!($existBusinessName && $existBusinessName['_id'] != $this->getId())) {
-
-                    $update = Database::connect()->prepare(
-                        "UPDATE 
-                        $this->table 
-                        SET 
-                        tradename = :tradename, 
-                        business_name = :business, 
-                        cif = :cif, 
-                        _id_status = :status
-                        WHERE _id = :id"
-                    );
-
-                    $update->bindValue(':tradename', $this->getTradename(), PDO::PARAM_STR);
-                    $update->bindValue(':business', $this->getbusinessName(), PDO::PARAM_STR);
-                    $update->bindValue(':cif', $this->getCif(), PDO::PARAM_STR);
-                    $update->bindValue(':status', $this->getIdStatus(), PDO::PARAM_INT);
-                    $update->bindValue(':id', $this->getId(), PDO::PARAM_INT);
-
-                    if ($update->execute()) {
-
-                        header('Location: ' . URL_BASE . $_GET['controller'] . '/' . $_GET['action'] . '/' . $_GET['id'] . '?status=1');
-                    } else {
-                        header('Location: ' . URL_BASE . $_GET['controller'] . '/' . $_GET['action'] . '/' . $_GET['id'] . '?status=0');
-                    }
-                }
-            } else {
-                return 'El correo "' . $this->getEmail() . '" ya está registrado.';
+            if (!($existCif['valid'] && $existCif['result']['_id'] != $this->getId())) {
+                throw new Exception('El cif "' . $this->getCif() . '" ya está registrado.');
             }
+
+            $existBusinessName = $this->getBy('business_name', $this->getbusinessName());
+            if (!($existBusinessName['valid'] && $existBusinessName['result']['_id'] != $this->getId())) {
+                throw new Exception('El nombre comercial "' . $this->getbusinessName() . '" ya está registrado.');
+            }
+
+            $update = Database::connect()->prepare("UPDATE $this->table SET tradename = :tradename, business_name = :business, cif = :cif, _id_status = :status WHERE _id = :id");
+            $update->bindValue(':tradename', $this->getTradename(), PDO::PARAM_STR);
+            $update->bindValue(':business', $this->getbusinessName(), PDO::PARAM_STR);
+            $update->bindValue(':cif', $this->getCif(), PDO::PARAM_STR);
+            $update->bindValue(':status', $this->getIdStatus(), PDO::PARAM_INT);
+            $update->bindValue(':id', $this->getId(), PDO::PARAM_INT);
+            $update->execute();
+
+            $result = ['id' => $this->getId()];
+            $this->success($result, 'Empresa registrado.');
+        } catch (Exception $e) {
+            $this->status(500)->fail($e->getMessage());
         } catch (PDOexception $e) {
-
-            return $e->getMessage();
+            $this->status(500)->error($e->getMessage());
+        } finally {
+            $update = null;
+            Database::disconnect();
+            return $this->send();
         }
-    }
-
-    public function delete()
-    {
     }
 
     // OTHERS METHODS
