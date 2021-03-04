@@ -14,8 +14,7 @@ require_once 'config/Globals.php';
 require_once 'helpers/Utils.php';
 
 require_once 'libs/Auth.php';
-require_once 'libs/ErrorHandler.php';
-
+ 
 require_once 'core/DatabaseHandler.php';
 require_once 'core/Database.php';
 
