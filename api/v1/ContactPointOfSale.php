@@ -14,7 +14,6 @@ class ContactPointOfSaleApi extends Api
 	public function new()
 	{
 
- 
 	}
 
 	public function read()
