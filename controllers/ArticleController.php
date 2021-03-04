@@ -13,9 +13,9 @@ class ArticleController extends Controller
 
     public function index()
     {
-        $articles = $this->model('generalArticle')->readAll();
+        $table = $this->model('generalArticle')->readAll();
         $pagination = $this->model('generalArticle')->paginations();
-
+        Head::title('Artículos');
         include View::render('article');
     }
 

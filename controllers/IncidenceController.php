@@ -13,10 +13,10 @@ class IncidenceController extends Controller
 
     public function index()
     {
-
-        $incidences = $this->model('incidence')->readAll();
+        $table = $this->model('incidence')->readAll();
         $pagination = $this->model('incidence')->paginations();
 
+        Head::title('Incidencias');
         include View::render('incidence');
     }
 
@@ -94,8 +94,8 @@ class IncidenceController extends Controller
 
     public function assigned()
     {
-
         $this->model('incidence')->setIdAttended($_SESSION['user_init']);
+        Head::title('Asignadas');
         $this->index();
     }
 

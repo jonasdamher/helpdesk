@@ -13,10 +13,9 @@ class CompanyController extends Controller
 
     public function index()
     {
-
-        $companies = $this->model('company')->readAll();
+        $table = $this->model('company')->readAll();
         $pagination = $this->model('company')->paginations();
-
+        Head::title('Compañias');
         include View::render('company');
     }
 

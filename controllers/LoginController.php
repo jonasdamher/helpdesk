@@ -21,11 +21,18 @@ class LoginController extends Controller
             $this->model('user')->setEmail($email);
             $this->model('user')->setPassword($password);
 
-            $login = $this->model('user')->login();
-            $this->setResponseMessage($login['message']);
+            $form = $this->model('user')->isValid();
+
+            if ($form['valid']) {
+                $login = $this->model('user')->login();
+                $this->notification()->setResponseMessage($login['message']);
+            } else {
+                $this->notification()->setResponseMessage($form['message']);
+            }
         }
 
         Head::title('Iniciar sesión');
+        Head::robots('index,follow');
         include View::render('user', 'login');
     }
 }

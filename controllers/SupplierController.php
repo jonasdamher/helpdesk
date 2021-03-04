@@ -13,10 +13,10 @@ class SupplierController extends Controller
 
     public function index()
     {
-
-        $suppliers = $this->model('supplier')->readAll();
+        $table = $this->model('supplier')->readAll();
         $pagination = $this->model('supplier')->paginations();
-
+        
+         Head::title('Proveedores');
         include View::render('supplier');
     }
 
