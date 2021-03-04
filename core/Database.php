@@ -14,7 +14,7 @@ class Database extends DatabaseHandler
      */
     public static function connect($db = null): object
     {
-        $db = is_null($db) ? parent::$dbByDefault : $db;
+        $db = is_null($db) ? Environment::process('DB_DEFAULT') : $db;
 
         if (!key_exists($db, parent::$connections) || is_null(parent::$connections[$db])) {
             parent::$connections[$db] = parent::connectionTo($db);
@@ -29,11 +29,10 @@ class Database extends DatabaseHandler
      */
     public static function disconnect($db = null)
     {
-        $db = is_null($db) ? parent::$dbByDefault : $db;
+        $db = is_null($db) ? Environment::process('DB_DEFAULT') : $db;
 
         parent::$connections[$db] = null;
     }
-
 
     /**
      * Desconectar todas las conexiones a DDBB.
