@@ -37,8 +37,8 @@
     <!-- MANIFEST -->
     <link rel="manifest" href="<?= URL_BASE ?>manifest.json" />
     <!-- CSS -->
-    <link rel="stylesheet" type="text/css" href="<?= URL_BASE ?>public/css/all.min.css" />
     <link rel="stylesheet" type="text/css" href="<?= URL_BASE ?>public/css/main.css" />
+    <link rel="stylesheet" type="text/css" href="<?= URL_BASE ?>public/css/all.min.css" />
     <?php
     $totalLinksCss = count(Head::getLinksCss());
     if ($totalLinksCss > 0) {

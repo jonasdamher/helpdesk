@@ -1,4 +1,4 @@
-<nav class="pagination  d-flex j-content-end" role="navigation" aria-label="Pagination">
+<nav class="pagination d-flex j-content-end" role="navigation" aria-label="Pagination">
 	<ul>
 		<?php
 		$countPagination = count($pagination) - 1;

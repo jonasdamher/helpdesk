@@ -1,1 +1,0 @@
-<button type="button" class="btn btn-text-light m-r-1 btn-navbar" title="Menu" aria-label="Menu"><i class="fas fa-bars" data-fa-transform="grow-12"></i></button>

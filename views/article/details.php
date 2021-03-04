@@ -17,7 +17,8 @@
           $dirImage = 'articles/' . $generalArticle['image'];
           $titleImage = $generalArticle['name'];
           $icon = 'box';
-          include 'views/includes/image-64px.php';
+          $sizeImage = '64';
+          include 'views/includes/image.php';
           ?>
        </div>
        <div class="pd-b-1">

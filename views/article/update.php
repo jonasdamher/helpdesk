@@ -14,7 +14,9 @@
       $dirImage = 'articles/' . $article['image'];
       $titleImage = $article['name'];
       $icon = 'box';
-      include 'views/includes/image-64px.php';
+      $sizeImage = '64';
+
+      include 'views/includes/image.php';
       ?>
      <form class="form" action="<?= URL_BASE . $_GET['controller'] . '/update/' . $_GET['id'] ?>" method="post" enctype="multipart/form-data">
        <div class="d-flex f-wrap">

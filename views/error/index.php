@@ -1,4 +1,4 @@
- <div class="container f-column">
+ <div class="container f-column <?= Menu::check() ? 'container-dashboard' : '' ?>">
    <section class="dashboard-header bg-blue d-flex j-content-center">
      <h1 class="h1 text-white"><?= PROJECT_NAME ?></h1>
    </section>
