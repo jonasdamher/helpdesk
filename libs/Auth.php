@@ -42,7 +42,7 @@ class Auth
                 throw new Exception();
             }
         } catch (Exception $e) {
-            ErrorHandler::response(401);
+           Utils::redirection('error/401');
         }
     }
 }
