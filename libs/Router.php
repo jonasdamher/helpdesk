@@ -9,10 +9,15 @@ Auth::path([$controllerName, $actionName]);
 
 $path = '';
 $api = filter_var(trim(($_GET['api'] ?? '')), FILTER_SANITIZE_STRING);
+$apiVersion = filter_var(trim(($_GET['version'] ?? '')), FILTER_SANITIZE_STRING);
 
 switch ($api) {
     case 'api':
         require_once 'core/Api.php';
+
+        if (API_VERSION != $apiVersion) {
+            Utils::redirection('error/404');
+        }
 
         $path = 'api/' . API_VERSION . '/';
         $controllerName = $controllerName . 'Api';
@@ -24,6 +29,10 @@ switch ($api) {
         require_once 'helpers/Menu.php';
         require_once 'core/Controller.php';
 
+        if (!empty($controllerName) && $controllerName == 'Error') {
+            $actionName = 'Error' . $actionName;
+        }
+
         $path = 'controllers/';
         $controllerName = $controllerName . 'Controller';
         break;
@@ -32,21 +41,21 @@ switch ($api) {
 require_once 'libs/autoload.php';
 
 if (!file_exists($path . $controllerName . '.php')) {
-    ErrorHandler::response(404);
+    Utils::redirection('error/404');
 }
 
 if (!class_exists($controllerName)) {
-    ErrorHandler::response(404);
+    Utils::redirection('error/404');
 }
 
 $controller = new $controllerName();
 
 if (empty($actionName)) {
-    ErrorHandler::response(500);
+    Utils::redirection('error/500');
 }
 
 if (!method_exists($controller, $actionName)) {
-    ErrorHandler::response(404);
+    Utils::redirection('error/404');
 }
 
 $controller->$actionName();
