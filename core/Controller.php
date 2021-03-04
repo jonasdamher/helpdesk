@@ -8,9 +8,9 @@ declare(strict_types=1);
 class Controller extends BaseController
 {
     private $responseMessage;
-
+    private $notification = false;
     // GET & SET
-    public function getResponseMessage(): string
+    protected function getResponseMessage(): string
     {
         $text = '';
         if (is_array($this->responseMessage)) {
@@ -21,6 +21,18 @@ class Controller extends BaseController
             $text = '<p class="p text-red text-bold pd-t-1">' . $this->responseMessage . '</p>';
         }
         return $text;
+    }
+
+    // GET & SET
+    protected function notification()
+    {
+        $this->notification = true;
+        return $this;
+    }
+    
+    protected function isNotification()
+    {
+        return $this->notification;
     }
 
     protected function setResponseMessage($message): void
