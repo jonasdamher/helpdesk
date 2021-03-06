@@ -25,15 +25,17 @@
     <fieldset class="fieldset col-6 col-12-md">
       <legend class="text-bold">Datos de sistema</legend>
       <div class="d-flex f-wrap">
-        <div class="form-box-input col-12">
-          <label class="label" for="password">Contraseña</label>
-          <input aria-describedby="password-help" class="ipt ipt-default" id="password" name="password" type="password" autocomplete="off" value="<?= $type == 'new' ? $user['password'] : '' ?>" minLength="8" autocomplete="off" required />
-          <span id="password-help">Debe tener mayusculas, números y simbolos especiales.</span>
-        </div>
-        <div class="form-box-input col-12">
-          <label class="label" for="password_repeat">Repetir contraseña</label>
-          <input class="ipt ipt-default" id="password_repeat" name="password_repeat" type="password" autocomplete="off" value="<?= $type == 'new' ? $user['password_repeat'] : '' ?>" minLength="8" autocomplete="off" required />
-        </div>
+        <?php if ($type == 'new') { ?>
+          <div class="form-box-input col-12">
+            <label class="label" for="password">Contraseña</label>
+            <input aria-describedby="password-help" class="ipt ipt-default" id="password" name="password" type="password" autocomplete="off" value="<?= $type == 'new' ? $user['password'] : '' ?>" minLength="8" autocomplete="off" required />
+            <span id="password-help">Debe tener mayusculas, números y simbolos especiales.</span>
+          </div>
+          <div class="form-box-input col-12">
+            <label class="label" for="password_repeat">Repetir contraseña</label>
+            <input class="ipt ipt-default" id="password_repeat" name="password_repeat" type="password" autocomplete="off" value="<?= $type == 'new' ? $user['password_repeat'] : '' ?>" minLength="8" autocomplete="off" required />
+          </div>
+        <?php } ?>
         <div class="form-box-input col-6 pd-r-1 pd-r-0-sm col-12-sm">
           <label class="label" for="id_rol">Rol</label>
           <div class="select">
@@ -57,5 +59,5 @@
       </div>
     </fieldset>
   </div>
-  <button class="btn btn-lg btn-dark border-rd shadow-lg f-self-end" type="submit">Registrar</button>
+  <button class="btn btn-lg btn-dark border-rd shadow-lg f-self-end" type="submit"><?= $type == 'new' ? 'Registrar' : 'Actualizar'; ?></button>
 </form>

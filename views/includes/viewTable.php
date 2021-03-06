@@ -25,7 +25,7 @@
                 <?php include 'views/includes/pagination.php'; ?>
             </div>
         <?php } else { ?>
-            <p>no hay nada.</p>
+            <?= $this->getResponseMessage() ?>
         <?php } ?>
     </section>
 </div>

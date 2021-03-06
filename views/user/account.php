@@ -1,7 +1,6 @@
  <div class="container container-dashboard f-column">
    <section class="dashboard-header bg-blue">
      <div class="d-flex f-items-center">
-       <?php include 'views/includes/button-navbar.php'; ?>
        <h1 class="h1 text-white">Mi cuenta</h1>
      </div>
    </section>
@@ -13,7 +12,7 @@
            <?php
             $dirImage = 'users/' . $_SESSION['image'];
             $titleImage = $_SESSION['name'] . ' ' . $_SESSION['lastname'];
-            $sizeImage='128';
+            $sizeImage = '128';
             $icon = 'user';
             include 'views/includes/image.php';
             ?>
@@ -25,13 +24,8 @@
          </div>
        </div>
      </div>
-     <div class="col-6 col-7-md col-12-sm bg-white pd-1 shadow-sm m-r-1">
-       <div class="d-flex f-column f-items-center">
-
-       </div>
-     </div>
      <div class="col-3 col-5-md col-12-sm bg-white pd-1 shadow-sm">
-       <form class="form" action="<?= URL_BASE . '/user/account' ?>" method="post">
+       <form class="form" action="<?= URL_BASE . 'user/account' ?>" method="post">
          <div class="form-box-input">
            <label class="label" for="currentPassword">Contraseña Actual</label>
            <input class="ipt ipt-default" id="currentPassword" name="currentPassword" type="password" autocomplete="off" value="<?= Utils::postCheck('currentPassword'); ?>" minLength="8" autocomplete="off" required />
@@ -47,7 +41,11 @@
          </div>
          <button class="btn btn-default btn-dark border-rd shadow-lg" type="submit">Actualizar contraseña</button>
        </form>
-       <?= $this->getResponseMessage() ?>
+       <?php
+        if (!$this->isNotification()) {
+          echo $this->getResponseMessage();
+        }
+        ?>
      </div>
    </section>
    <?php include 'views/includes/snackbar.php'; ?>

@@ -20,7 +20,11 @@ switch ($url) {
     </section>
     <section class="bg-white dashboard-content shadow-sm">
         <?php include $form; ?>
-        <?= $this->getResponseMessage(); ?>
+        <?php
+        if (!$this->isNotification()) {
+            echo $this->getResponseMessage();
+        }
+        ?>
     </section>
     <?php include 'views/includes/snackbar.php'; ?>
 </div>
