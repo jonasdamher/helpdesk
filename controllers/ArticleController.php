@@ -21,17 +21,14 @@ class ArticleController extends Controller
 
     public function details()
     {
-
         // GENERAL ARTICLE
         $this->model('generalArticle')->setId($_GET['id']);
         $generalArticle = $this->model('generalArticle')->getDetails();
-
         // ARTICLE ONLY
         $this->model('article')->setIdArticle($_GET['id']);
         $articles = $this->model('article')->readAll();
         $pagination = $this->model('article')->paginations();
         $articleOnlyStatus = $this->model('article')->getStatus();
-
         $articlesTotalBorrowed = $this->model('article')->totalBorrowed();
 
         include View::render('article', 'details');
@@ -39,7 +36,6 @@ class ArticleController extends Controller
 
     public function new()
     {
-
         $types = $this->model('generalArticle')->getArticlesTypes();
         $providers = $this->model('generalArticle')->getProviders();
 
@@ -71,7 +67,6 @@ class ArticleController extends Controller
 
     public function update()
     {
-
         $this->model('generalArticle')->setId($_GET['id']);
 
         $article = $this->model('generalArticle')->read();
