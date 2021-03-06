@@ -10,6 +10,7 @@ class UserModel extends BaseModel
     private string $lastname;
     private string $email;
     private string $password;
+    private string $repeatPassword;
     private int $idRol;
     private int $idStatus;
     private $image;
@@ -69,6 +70,16 @@ class UserModel extends BaseModel
         $this->password = $this->validate($password)->require()->string();
     }
 
+
+    public function getRepeatPassword(): string
+    {
+        return $this->repeatPassword;
+    }
+
+    public function setRepeatPassword(string $repeatPassword): void
+    {
+        $this->repeatPassword = $this->validate($repeatPassword)->require()->string();
+    }
     public function getIdRol(): int
     {
         return $this->idRol;
@@ -329,13 +340,6 @@ class UserModel extends BaseModel
                 throw new Exception('El correo "' . $this->getEmail() . '" ya está registrado.');
             }
 
-            /*
-            $imageUpload = $this->Image('users', ['CurrentimageName' => $user['image'], 'updateImage' => $this->getImage()], 'update');
-            if ($imageUpload['valid']) {
-                throw new Exception($imageUpload['errors']);
-            }
-            $image = !is_null($imageUpload['filename']) ? ', image = :image' : '';
-            */
             $update = Database::connect()->prepare(
                 "UPDATE 
                     $this->table 
@@ -353,19 +357,16 @@ class UserModel extends BaseModel
             $update->bindValue(':email', $this->getEmail(), PDO::PARAM_STR);
             $update->bindValue(':rol', $this->getIdRol(), PDO::PARAM_INT);
             $update->bindValue(':status', $this->getIdStatus(), PDO::PARAM_INT);
-            /*
-            if (!is_null($imageUpload['filename'])) {
-                $update->bindValue(':image', $imageUpload['filename'], PDO::PARAM_STR);
-            }
-            */
             $update->bindValue(':id', $this->getId(), PDO::PARAM_INT);
             $update->execute();
-
-            $newData = $this->read();
             if ($_SESSION['user_init'] == $this->getId()) {
-                $this->sessionUser($newData);
+                $newData = $this->read();
+                $this->sessionUser($newData['result']);
             }
-            $this->success($newData, 'Usuario actualizado.');
+
+            $id = ['id' => $this->getId()];
+
+            $this->success($id, 'Usuario actualizado.');
         } catch (Exception $e) {
             $this->status(404)->fail($e->getMessage());
         } catch (PDOexception $e) {
@@ -380,20 +381,21 @@ class UserModel extends BaseModel
     public function updatePassword(): array
     {
         try {
-            $update = Database::connect()->prepare(
-                "UPDATE $this->table 
-                SET password = :password
-                WHERE _id = :id"
-            );
+            if ($this->getPassword() != $this->getRepeatPassword()) {
+                throw new Exception('Las credenciales no coinciden.');
+            }
 
+            $update = Database::connect()->prepare("UPDATE $this->table SET password = :password WHERE _id = :id");
             $update->bindValue(':password', $this->passHas(), PDO::PARAM_STR);
             $update->bindValue(':id', $this->getId(), PDO::PARAM_INT);
             $update->execute();
 
             $result = ['id' => $this->getId()];
             $this->success($result, 'Usuario actualizado.');
+        } catch (Exception $e) {
+            $this->status(400)->fail($e->getMessage());
         } catch (PDOexception $e) {
-            $this->status(500)->fail($e->getMessage());
+            $this->status(500)->error($e->getMessage());
         } finally {
             $update = null;
             Database::disconnect();
@@ -404,11 +406,9 @@ class UserModel extends BaseModel
     public function verifyPassword(): array
     {
         try {
-
             $userResponse = $this->read();
-
             if (!password_verify($this->getPassword(), $userResponse['result']['password'])) {
-                throw new Exception('Las credenciales no coinciden.');
+                throw new Exception('La contraseña actual no coincide.');
             }
 
             $this->success(['id' => $userResponse['result']['_id']]);

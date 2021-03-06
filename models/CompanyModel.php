@@ -75,7 +75,6 @@ class CompanyModel extends BaseModel
 
     private function queryCompany()
     {
-
         require_once 'libs/QueryBuild.php';
         $build = new QueryBuild();
 
