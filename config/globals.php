@@ -13,6 +13,7 @@ define('PROJECT_NAME', Environment::process('PROJECT_NAME'));
 define('PROJECT_VERSION', Environment::process('PROJECT_VERSION'));
 // Versión de api.
 define('API_VERSION', Environment::process('API_VERSION'));
-
+//Nivel de notificaciones de error.
+define('ERROR_REPORTING', Environment::process('ERROR_REPORTING'));
 // Formatos de imagen admitidos
 define('ALLOW_IMAGES', 'image/x-png,image/jpg,image/jpeg');
