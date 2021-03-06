@@ -12,7 +12,7 @@ class Menu
 
     public static function active(string $controller, string $action = 'index'): string
     {
-        if ($_GET['controller'] != $controller || $_GET['action'] != $action) {
+        if (ucfirst($_GET['controller']) != $controller || lcfirst($_GET['action']) != $action) {
             return '';
         }
         return 'active';
