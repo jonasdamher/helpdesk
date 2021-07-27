@@ -1,0 +1,84 @@
+@font-face {
+    font-family: Montserrat;
+    font-style: normal;
+    font-weight: 400;
+    src: url('/fonts/Montserrat-Regular.ttf');
+    font-display: swap;
+}
+
+body {
+    font-family: Montserrat;
+}
+
+#navbarMain{
+    position: sticky;
+    top: 0;
+}
+
+.navbar-vertical {
+    width: 250px;
+    position: fixed;
+    left: 0;
+    top: 54.22px;
+    bottom: 0;
+    visibility: visible;
+    z-index: 20;
+}
+
+.ml-navbar {
+    margin-left: 250px;
+}
+
+.bg-white {
+    background-color: #fff;
+}
+
+.bg-menu {
+    background-color: #0000002e;
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 54.22px;
+    bottom: 0;
+    cursor: pointer;
+    z-index: 10;
+    visibility: hidden;
+}
+
+#btnMenu {
+    display: none;
+}
+
+/* Shadows */
+
+.sd-sm {
+    box-shadow: 0 1px 3px #0000001f, 0 1px 2px #0000003d;
+}
+
+.sd-lg {
+    box-shadow: 0 2px 4px #00000029, 0 2px 4px #0000003b;
+}
+
+/* Final - Shadows */
+
+.index-30 {
+    z-index: 30;
+}
+
+@media (max-width:768px) {
+    #menu.show {
+        visibility: visible;
+    }
+    #menu.show~.bg-menu {
+        visibility: visible;
+    }
+    .navbar-vertical {
+        visibility: hidden;
+    }
+    .ml-navbar {
+        margin-left: 0;
+    }
+    #btnMenu {
+        display: inline-block;
+    }
+}
